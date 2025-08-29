@@ -285,47 +285,50 @@ elif page == "Quiz":
 
 
 # ---------- Chatbot ----------
-import streamlit as st
 import requests
+import streamlit as st
 
-st.header("🤖 German Chatbot")
-st.write("Chat with an AI assistant in German!")
+# OpenAssistant API endpoint
+OPENASSISTANT_API_URL = "https://api.openassistantgpt.io/v1/chat/completions"
 
-# Initialize session state for chat history
+# Initialize session state for chat history if not already present
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Display chat history
-for user_message, bot_response in st.session_state.chat_history:
-    st.markdown(f"**You:** {user_message}")
-    st.markdown(f"**Bot:** {bot_response}")
-
-# User input
-user_input = st.text_input("You:", key="user_input")
-
-if user_input:
-    # Append user message to chat history
-    st.session_state.chat_history.append(("You", user_input))
-
-    # Send request to OpenAssistant API
-    url = "https://api.openassistant.io/v1/chat"
+# Function to send messages to OpenAssistant API
+def send_message_to_openassistant(message: str):
     headers = {"Content-Type": "application/json"}
     data = {
-        "messages": [{"role": "user", "content": user_input}],
-        "language": "de-DE"  # Specify German language
+        "messages": [{"role": "user", "content": message}],
+        "model": "gpt-3.5-turbo",
+        "language": "de",  # Specify German language
     }
-    response = requests.post(url, json=data, headers=headers)
+    try:
+        response = requests.post(OPENASSISTANT_API_URL, json=data, headers=headers)
+        response.raise_for_status()
+        return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
+    except requests.exceptions.RequestException as e:
+        return f"Error: {e}"
 
-    if response.status_code == 200:
-        bot_message = response.json().get("message", "Sorry, I didn't understand that.")
+# Chatbot interface
+st.header("🤖 German Chatbot")
+user_input = st.text_input("You:", key="chat_input")
+
+if st.button("Send") and user_input:
+    # Display user message
+    st.session_state.chat_history.append(("You", user_input))
+    # Get response from OpenAssistant
+    bot_reply = send_message_to_openassistant(user_input)
+    # Display bot reply
+    st.session_state.chat_history.append(("Bot", bot_reply))
+    st.experimental_rerun()
+
+# Display chat history
+for sender, message in st.session_state.chat_history:
+    if sender == "You":
+        st.markdown(f"**You:** {message}")
     else:
-        bot_message = "Error: Unable to get response from chatbot."
-
-    # Append bot response to chat history
-    st.session_state.chat_history.append(("Bot", bot_message))
-
-    # Clear input field
-    st.text_input("You:", "", key="user_input")
+        st.markdown(f"**Bot:** {message}")
 
 
 # ---------- Progress page ----------
