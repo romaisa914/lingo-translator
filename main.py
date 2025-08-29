@@ -122,7 +122,6 @@ elif page == "Translator":
 # ---------- quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
-    # prefer quiz from session if opened from lesson page
     default_lesson = st.session_state.get("quiz_for", None)
     quiz_options = [q["lesson_id"] for q in quizzes]
 
@@ -142,11 +141,22 @@ elif page == "Quiz":
             for i, q in enumerate(quiz["content"]):
                 st.markdown(f"**Q{i+1}: {q['question']}**")
                 if q["type"] == "mcq":
-                    answers[i] = st.radio("", q["options"], key=f"q{i}")
+                    answers[i] = st.radio(
+                        f"Q{i+1}",  # 🔑 unique label
+                        q["options"],
+                        key=f"q{i}"
+                    )
                 elif q["type"] == "fill":
-                    answers[i] = st.text_input("", key=f"q{i}")
+                    answers[i] = st.text_input(
+                        f"Q{i+1}",  # 🔑 unique label
+                        key=f"q{i}"
+                    )
                 elif q["type"] == "truefalse":
-                    answers[i] = st.selectbox("", ["True", "False"], key=f"q{i}")
+                    answers[i] = st.selectbox(
+                        f"Q{i+1}",  # 🔑 unique label
+                        ["True", "False"],
+                        key=f"q{i}"
+                    )
                 st.write("---")
             submitted = st.form_submit_button("Submit Quiz")
 
@@ -173,10 +183,10 @@ elif page == "Quiz":
             st.write("---")
             st.success(f"Final Score: {score} / {total}")
 
-            # Mark lesson complete if passed >= 50%
             if score / total >= 0.5:
                 st.session_state.completed.add(sel_id)
                 st.info("Lesson marked complete because you passed the quiz ✅")
+
 
 
 # ---------- Chatbot ----------
