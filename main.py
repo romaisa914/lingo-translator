@@ -90,6 +90,12 @@ if page == "Home":
 elif page == "Lessons":
     st.header("📚 Lessons")
 
+    # ✅ Make sure lessons is fully loaded from JSON (not sliced!)
+    # Example (put this at the top of your script, not inside this block):
+    # with open("lessons.json", "r", encoding="utf-8") as f:
+    #     lessons = json.load(f)
+    # lesson_map = {l["lesson_id"]: l for l in lessons}
+
     # Build label -> id map once
     lesson_labels = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
     label_to_id = {label: l["lesson_id"] for label, l in zip(lesson_labels, lessons)}
@@ -99,17 +105,15 @@ elif page == "Lessons":
     preselected = st.session_state.get("_selected_lesson")
     if preselected is not None:
         try:
-            # find the matching label index (+1 because of the "-- choose --" entry)
             target_label = next(lbl for lbl in lesson_labels
                                 if label_to_id[lbl] == preselected)
             default_index = lesson_labels.index(target_label) + 1
         except StopIteration:
             default_index = 0
         finally:
-            # clear it after using so it doesn't stick forever
             st.session_state._selected_lesson = None
 
-    # ---- Single lesson view (top) ----
+    # ---- Single lesson view (dropdown) ----
     sel = st.selectbox(
         "Select a lesson",
         ["-- choose --"] + lesson_labels,
@@ -123,7 +127,6 @@ elif page == "Lessons":
         st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
         st.caption("Practice these words/phrases:")
 
-        # ✅ Show ALL items (no slicing)
         for idx, item in enumerate(lesson.get("content", []), start=1):
             st.write(f"{idx}. **{item['en']}** → *{item['de']}*")
 
@@ -137,6 +140,22 @@ elif page == "Lessons":
             st.experimental_rerun()
 
     st.markdown("---")
+
+    # ---- All lessons view (expanders) ----
+    st.subheader("All lessons")
+    for l in lessons:
+        with st.expander(f"Lesson {l['lesson_id']}: {l['title']}"):
+            for idx, item in enumerate(l.get("content", []), start=1):
+                st.write(f"{idx}. **{item['en']}** → *{item['de']}*")
+            c1, c2 = st.columns(2)
+            if c1.button("Mark complete", key=f"exp_complete_{l['lesson_id']}"):
+                st.session_state.completed.add(l["lesson_id"])
+                st.success("Marked complete ✅")
+            if c2.button("Open quiz", key=f"exp_open_quiz_{l['lesson_id']}"):
+                st.session_state.quiz_for = l["lesson_id"]
+                st.success("Quiz selected — open the Quiz tab.")
+                st.experimental_rerun()
+
 
     # ---- All lessons view (expanders) ----
     st.subheader("All lessons")
