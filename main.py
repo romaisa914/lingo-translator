@@ -147,6 +147,52 @@ elif page == "Lessons":
             st.session_state.quiz_for = lesson_id
             st.experimental_rerun()
 
+# ---------- Lessons ----------
+elif page == "Lessons":
+    st.header("📚 Lessons")
+
+    # Check if lesson was selected from Home
+    if "_selected_lesson" in st.session_state and st.session_state._selected_lesson is not None:
+        lesson_id = st.session_state._selected_lesson
+        lesson = lesson_map[lesson_id]
+        st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
+        st.write("Practice these words/phrases:")
+        for item in lesson["content"]:
+            st.write(f"- **{item['en']}** → *{item['de']}*")
+            cols = st.columns([6,1])
+            if cols[1].button(f"🔊 {item['de']}", key=f"tts_{lesson_id}_{item['de']}"):
+                st.write("")  
+        st.write("")
+        if st.button("Mark lesson complete"):
+            st.session_state.completed.add(lesson_id)
+            st.success("Lesson marked complete ✅")
+        if st.button("Open lesson quiz"):
+            st.session_state.quiz_for = lesson_id
+            st.experimental_rerun()
+
+    else:
+        # fallback to manual select
+        lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
+        sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
+        if sel and sel != "-- choose --":
+            lesson_id = int(sel.split()[1].strip(':'))
+            lesson = lesson_map[lesson_id]
+            st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
+            st.write("Practice these words/phrases:")
+            for item in lesson["content"]:
+                st.write(f"- **{item['en']}** → *{item['de']}*")
+                cols = st.columns([6,1])
+                if cols[1].button(f"🔊 {item['de']}", key=f"tts_{lesson_id}_{item['de']}"):
+                    st.write("")
+            st.write("")
+            if st.button("Mark lesson complete"):
+                st.session_state.completed.add(lesson_id)
+                st.success("Lesson marked complete ✅")
+            if st.button("Open lesson quiz"):
+                st.session_state.quiz_for = lesson_id
+                st.experimental_rerun()
+
+
 # ---------- Translator ----------
 elif page == "Translator":
     st.header("🔁 Translator")
