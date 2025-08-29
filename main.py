@@ -120,40 +120,79 @@ elif page == "Translator":
                 out = translate_text(text_input, target)
                 st.success(out)
 # ---------- quiz ----------
-elif page == "Quizzes":
-    st.title("📝 Quizzes")
+elif page == "Quiz":
+    st.header("🧪 Quiz")
+    default_lesson = st.session_state.get("quiz_for", None)
+    quiz_options = [q["lesson_id"] for q in quizzes]
 
-    # Expand quizzes into single-question quizzes
-    expanded_quizzes = {}
-    for quiz_key, quiz_data in quizzes.items():
-        for i, q in enumerate(quiz_data["content"], start=1):
-            expanded_key = f"{quiz_key}_q{i}"
-            expanded_quizzes[expanded_key] = {
-                "lesson_id": f"{quiz_data['lesson_id']}_q{i}",
-                "content": [q]  # only one question
-            }
+    sel_id = st.selectbox(
+        "Choose lesson quiz",
+        [None] + quiz_options,
+        index=0 if default_lesson is None else quiz_options.index(default_lesson) + 1
+    )
 
-    # Show quiz options
-    quiz_choice = st.selectbox("Select a quiz", list(expanded_quizzes.keys()))
+    if sel_id:
+        quiz = next(q for q in quizzes if q["lesson_id"] == sel_id)
+        st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
 
-    if quiz_choice:
-        quiz = expanded_quizzes[quiz_choice]
-        st.subheader(f"Quiz {quiz['lesson_id']}")
+        # 👇 One form wrapping ALL questions
+        with st.form("quiz_form"):
+            answers = {}
 
-        with st.form(key=f"quiz_form_{quiz_choice}"):
+            for i, q in enumerate(quiz["content"]):
+                st.markdown(f"**Q{i+1}: {q['question']}**")
+
+                if q["type"] == "mcq":
+                    answers[i] = st.radio(
+                        f"Q{i+1}_mcq",   # 👈 UNIQUE key
+                        q["options"],
+                        key=f"q{i}_mcq"
+                    )
+
+                elif q["type"] == "fill":
+                    answers[i] = st.text_input(
+                        f"Q{i+1}_fill",  # 👈 UNIQUE key
+                        key=f"q{i}_fill"
+                    )
+
+                elif q["type"] == "truefalse":
+                    answers[i] = st.selectbox(
+                        f"Q{i+1}_tf",   # 👈 UNIQUE key
+                        ["True", "False"],
+                        key=f"q{i}_tf"
+                    )
+
+                st.write("---")
+
+            submitted = st.form_submit_button("Submit Quiz")
+
+        if submitted:
             score = 0
             total = len(quiz["content"])
-            for idx, q in enumerate(quiz["content"]):
-                st.write(f"**Q{idx+1}: {q['question']}**")
-                user_answer = st.text_input(f"Your answer for Q{idx+1}", key=f"{quiz_choice}_q{idx}")
-                correct_answer = q["answer"]
+            st.write("### Results")
 
-            submitted = st.form_submit_button("Submit")
-            if submitted:
-                if user_answer.strip().lower() == correct_answer.strip().lower():
-                    st.success("✅ Correct!")
+            for i, q in enumerate(quiz["content"]):
+                user_a = str(answers.get(i, "")).strip().lower()
+                correct_a = str(q["answer"]).strip().lower()
+
+                if q["type"] == "truefalse":
+                    correct_a = "true" if q["answer"] else "false"
+
+                if user_a == correct_a:
+                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
+                    score += 1
                 else:
-                    st.error(f"❌ Wrong! Correct answer: {correct_answer}")
+                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
+                    st.info(f"Correct answer: **{q['answer']}**")
+
+            # final score
+            st.write("---")
+            st.success(f"Final Score: {score} / {total}")
+
+            if score / total >= 0.5:
+                st.session_state.completed.add(sel_id)
+                st.info("Lesson marked complete because you passed the quiz ✅")
+
 
 
 
