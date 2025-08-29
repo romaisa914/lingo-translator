@@ -287,64 +287,95 @@ elif page == "Quiz":
 # ---------- Chatbot ----------
 # ---------- Chatbot ----------
 elif page == "Chatbot":
-    import streamlit as st
-    from transformers import AutoTokenizer, AutoModelForCausalLM
-    import torch
-
     st.header("🤖 German Chatbot")
     st.write("Chat with a German language model (Hugging Face GPT-2)")
 
     # Initialize chat history
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    if "gpt_chat_history" not in st.session_state:
+        st.session_state.gpt_chat_history = []
 
     # Load model/tokenizer (cached for performance)
     @st.cache_resource
     def load_german_model():
-        tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
-        model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
-        return tokenizer, model
+        try:
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
+            model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
+            # Add padding token if it doesn't exist
+            if tokenizer.pad_token is None:
+                tokenizer.pad_token = tokenizer.eos_token
+            return tokenizer, model
+        except Exception as e:
+            st.error(f"Error loading model: {e}")
+            return None, None
 
     tokenizer, model = load_german_model()
 
     # Function to generate response
     def chat_german(prompt, chat_history=None, max_length=100):
-        history_text = " ".join(chat_history[-5:]) if chat_history else ""
-        full_prompt = history_text + " " + prompt if history_text else prompt
-        inputs = tokenizer.encode(full_prompt, return_tensors="pt")
-        # Ensure max_length does not exceed model capacity
-        max_model_len = model.config.n_positions
-        if inputs.shape[1] + max_length > max_model_len:
-            max_length = max_model_len - inputs.shape[1] - 1
-        outputs = model.generate(
-            inputs,
-            max_length=inputs.shape[1] + max_length,
-            pad_token_id=tokenizer.eos_token_id,
-            do_sample=True,
-            temperature=0.7,
-            top_p=0.9
-        )
-        reply = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        # Return only the new response
-        return reply[len(full_prompt):].strip()
-
-    # User input
-    user_input = st.text_input("You:", key="chat_input")
-    if st.button("Send") and user_input.strip():
-        # Append user message
-        st.session_state.chat_history.append(user_input)
-        # Generate bot reply
-        bot_reply = chat_german(user_input, st.session_state.chat_history)
-        st.session_state.chat_history.append(bot_reply)
-        st.experimental_rerun()
+        if tokenizer is None or model is None:
+            return "Model not available. Please check the logs for errors."
+        
+        try:
+            history_text = " ".join(chat_history[-5:]) if chat_history else ""
+            full_prompt = history_text + " " + prompt if history_text else prompt
+            
+            inputs = tokenizer.encode(full_prompt, return_tensors="pt")
+            
+            # Ensure max_length does not exceed model capacity
+            max_model_len = model.config.n_positions
+            if inputs.shape[1] + max_length > max_model_len:
+                max_length = max_model_len - inputs.shape[1] - 1
+            
+            if max_length <= 0:
+                return "Input too long. Please try a shorter message."
+            
+            with torch.no_grad():
+                outputs = model.generate(
+                    inputs,
+                    max_length=inputs.shape[1] + max_length,
+                    pad_token_id=tokenizer.eos_token_id,
+                    do_sample=True,
+                    temperature=0.7,
+                    top_p=0.9,
+                    repetition_penalty=1.1
+                )
+            
+            reply = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            # Return only the new response
+            return reply[len(full_prompt):].strip()
+        except Exception as e:
+            return f"Error generating response: {str(e)}"
 
     # Display chat history
-    for idx, msg in enumerate(st.session_state.chat_history):
+    for idx, msg in enumerate(st.session_state.gpt_chat_history):
         if idx % 2 == 0:
             st.markdown(f"**You:** {msg}")
         else:
             st.markdown(f"**Bot:** {msg}")
 
+    # User input at the bottom
+    user_input = st.text_input("You:", key="gpt_chat_input", value="")
+    
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        if st.button("Send") and user_input.strip():
+            # Append user message
+            st.session_state.gpt_chat_history.append(user_input)
+            # Generate bot reply
+            with st.spinner("Thinking..."):
+                bot_reply = chat_german(user_input, st.session_state.gpt_chat_history)
+            st.session_state.gpt_chat_history.append(bot_reply)
+            # Clear input by updating session state
+            st.session_state.gpt_chat_input = ""
+            # Rerun to update the display
+            st.rerun()
+    
+    with col2:
+        if st.button("Clear Chat"):
+            st.session_state.gpt_chat_history = []
+            st.session_state.gpt_chat_input = ""
+            st.rerun()
 
 # ---------- Progress page ----------
 # ---------- Progress page ----------
