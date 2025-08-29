@@ -90,6 +90,8 @@ if page == "Home":
 # ---------- Lessons page ----------
 elif page == "Lessons":
     st.header("📚 Lessons")
+
+    # Lesson dropdown
     lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
     sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
 
@@ -100,9 +102,10 @@ elif page == "Lessons":
         st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
         st.write("Practice these words/phrases:")
 
-        # ✅ Use markdown instead of write to show ALL 30
-        for item in lesson["content"]:
-            st.markdown(f"- **{item['en']}** → *{item['de']}*")
+        # ✅ Display ALL 30 items inside a scrollable container
+        with st.container():
+            for item in lesson["content"]:
+                st.markdown(f"- **{item['en']}** → *{item['de']}*")
 
         st.write("")
         if st.button("Mark lesson complete"):
@@ -112,6 +115,7 @@ elif page == "Lessons":
         if st.button("Open lesson quiz"):
             st.session_state.quiz_for = lesson_id
             st.experimental_rerun()
+
 
 
 
