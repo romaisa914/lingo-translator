@@ -1,30 +1,54 @@
 [
   {
     "lesson_id": 1,
-    "title": "Basic Greetings Quiz",
+    "title": "Basic Greetings Quiz (20 Qs)",
     "content": [
-      {
-        "type": "mcq",
-        "question": "What is 'Hello' in German?",
-        "options": ["Hallo", "Tschüss", "Bitte", "Danke"],
-        "answer": "Hallo"
-      },
-      {
-        "type": "fill",
-        "question": "Fill in: Good ___ (morning)",
-        "answer": "Morgen"
-      }
+      {"type":"mcq","question":"What is 'Hello' in German?","options":["Hallo","Tschüss","Bitte","Danke"],"answer":"Hallo"},
+      {"type":"mcq","question":"What is 'Goodbye' in German?","options":["Guten Morgen","Auf Wiedersehen","Wie geht's?","Bis bald"],"answer":"Auf Wiedersehen"},
+      {"type":"mcq","question":"How do you say 'Thank you' in German?","options":["Bitte","Danke","Guten Tag","Hallo"],"answer":"Danke"},
+      {"type":"fill","question":"Fill in: Good ___ (morning)","answer":"Morgen"},
+      {"type":"mcq","question":"Which means 'See you soon'?","options":["Bis bald","Ich heiße","Wie alt bist du?","Willkommen"],"answer":"Bis bald"},
+      {"type":"mcq","question":"Which is 'Welcome' in German?","options":["Willkommen","Nein","Ja","Tschüss"],"answer":"Willkommen"},
+      {"type":"fill","question":"Translate: 'How are you?'","answer":"Wie geht's?"},
+      {"type":"mcq","question":"Which means 'Yes'?","options":["Ja","Nein","Bitte","Danke"],"answer":"Ja"},
+      {"type":"mcq","question":"Which means 'No'?","options":["Bitte","Nein","Guten Abend","Hallo"],"answer":"Nein"},
+      {"type":"truefalse","question":"True or False: 'Guten Abend' means 'Good evening'","answer":true},
+      {"type":"mcq","question":"Which greeting is used in the morning?","options":["Guten Morgen","Guten Abend","Gute Nacht","Willkommen"],"answer":"Guten Morgen"},
+      {"type":"fill","question":"Fill: I am fine -> (German)","answer":"Mir geht es gut"},
+      {"type":"mcq","question":"Which means 'Nice to meet you'?","options":["Schön, dich kennenzulernen","Bis bald","Auf Wiedersehen","Wie heißt du?"],"answer":"Schön, dich kennenzulernen"},
+      {"type":"mcq","question":"Which is a way to say 'Bye'?","options":["Tschüss","Danke","Bitte","Wie geht's?"],"answer":"Tschüss"},
+      {"type":"fill","question":"Translate: 'See you soon'","answer":"Bis bald"},
+      {"type":"mcq","question":"Which is a formal greeting?","options":["Guten Tag","Tschüss","Bis bald","Wie alt bist du?"],"answer":"Guten Tag"},
+      {"type":"mcq","question":"What is correct for 'Good night'?","options":["Gute Nacht","Guten Morgen","Guten Tag","Guten Abend"],"answer":"Gute Nacht"},
+      {"type":"fill","question":"How to say 'My name is...' in German?","answer":"Ich heiße..."},
+      {"type":"mcq","question":"Which phrase asks someone's name?","options":["Wie heißt du?","Wie geht's?","Bis bald","Danke"],"answer":"Wie heißt du?"},
+      {"type":"mcq","question":"Which means 'Pleased to meet you'?","options":["Freut mich","Tschüss","Nein","Ja"],"answer":"Freut mich"}
     ]
   },
   {
     "lesson_id": 2,
-    "title": "Common Phrases Quiz",
+    "title": "Common Phrases Quiz (20 Qs)",
     "content": [
-      {
-        "type": "truefalse",
-        "question": "True or False: 'Danke' means 'Please'",
-        "answer": false
-      }
+      {"type":"mcq","question":"What is 'Please' in German?","options":["Bitte","Danke","Hallo","Tschüss"],"answer":"Bitte"},
+      {"type":"mcq","question":"Which means 'Excuse me'?","options":["Entschuldigung","Guten Tag","Bis bald","Guten Abend"],"answer":"Entschuldigung"},
+      {"type":"fill","question":"Translate 'I'm sorry'","answer":"Es tut mir leid"},
+      {"type":"mcq","question":"Which means 'I don't understand'?","options":["Ich verstehe nicht","Wie alt bist du?","Ich heiße...","Willkommen"],"answer":"Ich verstehe nicht"},
+      {"type":"mcq","question":"Which says 'What is your name?'","options":["Wie heißt du?","Wie geht's?","Guten Morgen","Tschüss"],"answer":"Wie heißt du?"},
+      {"type":"fill","question":"Translate: 'Where are you from?'","answer":"Woher kommst du?"},
+      {"type":"mcq","question":"Which means 'I am from...'?","options":["Ich komme aus...","Ich heiße...","Wie alt bist du?","Mir geht es gut"],"answer":"Ich komme aus..."},
+      {"type":"truefalse","question":"True or False: 'Bitte' means 'Thank you'","answer":false},
+      {"type":"mcq","question":"Which response means 'You're welcome'?","options":["Gern geschehen","Danke","Bitte","Tschüss"],"answer":"Gern geschehen"},
+      {"type":"mcq","question":"Which means 'Can you help me?'","options":["Können Sie mir helfen?","Wie heißt du?","Ich bin fine","Gute Nacht"],"answer":"Können Sie mir helfen?"},
+      {"type":"fill","question":"Translate: 'How old are you?'","answer":"Wie alt bist du?"},
+      {"type":"mcq","question":"Which is polite for 'Please help'?","options":["Bitte helfen Sie mir","Guten Morgen","Bis bald","Tschüss"],"answer":"Bitte helfen Sie mir"},
+      {"type":"mcq","question":"Which is 'I would like' in German?","options":["Ich möchte","Ich heiße","Ich komme aus","Ich verstehe"],"answer":"Ich möchte"},
+      {"type":"fill","question":"Fill: 'Do you speak English?' -> (German)","answer":"Sprechen Sie Englisch?"},
+      {"type":"mcq","question":"Which means 'Where is the bathroom?'","options":["Wo ist die Toilette?","Wie heißt du?","Ich heiße...","Guten Tag"],"answer":"Wo ist die Toilette?"},
+      {"type":"mcq","question":"Which means 'How much is this?'","options":["Wie viel kostet das?","Wie alt bist du?","Wie geht's?","Auf Wiedersehen"],"answer":"Wie viel kostet das?"},
+      {"type":"fill","question":"Translate: 'I don't speak German well'","answer":"Ich spreche nicht gut Deutsch"},
+      {"type":"mcq","question":"Which phrase asks for the bill?","options":["Die Rechnung, bitte","Danke schön","Guten Morgen","Bis dann"],"answer":"Die Rechnung, bitte"},
+      {"type":"mcq","question":"Which is used to apologize?","options":["Entschuldigung","Danke","Bitte","Ja"],"answer":"Entschuldigung"},
+      {"type":"mcq","question":"Which means 'I understand a little'?","options":["Ich verstehe ein bisschen","Ich verstehe nicht","Ich heiße...","Mir geht es gut"],"answer":"Ich verstehe ein bisschen"}
     ]
   }
 ]
