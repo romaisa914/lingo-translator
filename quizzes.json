@@ -1,54 +1,224 @@
-[
-  {
-    "lesson_id": 1,
-    "title": "Basic Greetings Quiz (20 Qs)",
-    "content": [
-      {"type":"mcq","question":"What is 'Hello' in German?","options":["Hallo","Tschüss","Bitte","Danke"],"answer":"Hallo"},
-      {"type":"mcq","question":"What is 'Goodbye' in German?","options":["Guten Morgen","Auf Wiedersehen","Wie geht's?","Bis bald"],"answer":"Auf Wiedersehen"},
-      {"type":"mcq","question":"How do you say 'Thank you' in German?","options":["Bitte","Danke","Guten Tag","Hallo"],"answer":"Danke"},
-      {"type":"fill","question":"Fill in: Good ___ (morning)","answer":"Morgen"},
-      {"type":"mcq","question":"Which means 'See you soon'?","options":["Bis bald","Ich heiße","Wie alt bist du?","Willkommen"],"answer":"Bis bald"},
-      {"type":"mcq","question":"Which is 'Welcome' in German?","options":["Willkommen","Nein","Ja","Tschüss"],"answer":"Willkommen"},
-      {"type":"fill","question":"Translate: 'How are you?'","answer":"Wie geht's?"},
-      {"type":"mcq","question":"Which means 'Yes'?","options":["Ja","Nein","Bitte","Danke"],"answer":"Ja"},
-      {"type":"mcq","question":"Which means 'No'?","options":["Bitte","Nein","Guten Abend","Hallo"],"answer":"Nein"},
-      {"type":"truefalse","question":"True or False: 'Guten Abend' means 'Good evening'","answer":true},
-      {"type":"mcq","question":"Which greeting is used in the morning?","options":["Guten Morgen","Guten Abend","Gute Nacht","Willkommen"],"answer":"Guten Morgen"},
-      {"type":"fill","question":"Fill: I am fine -> (German)","answer":"Mir geht es gut"},
-      {"type":"mcq","question":"Which means 'Nice to meet you'?","options":["Schön, dich kennenzulernen","Bis bald","Auf Wiedersehen","Wie heißt du?"],"answer":"Schön, dich kennenzulernen"},
-      {"type":"mcq","question":"Which is a way to say 'Bye'?","options":["Tschüss","Danke","Bitte","Wie geht's?"],"answer":"Tschüss"},
-      {"type":"fill","question":"Translate: 'See you soon'","answer":"Bis bald"},
-      {"type":"mcq","question":"Which is a formal greeting?","options":["Guten Tag","Tschüss","Bis bald","Wie alt bist du?"],"answer":"Guten Tag"},
-      {"type":"mcq","question":"What is correct for 'Good night'?","options":["Gute Nacht","Guten Morgen","Guten Tag","Guten Abend"],"answer":"Gute Nacht"},
-      {"type":"fill","question":"How to say 'My name is...' in German?","answer":"Ich heiße..."},
-      {"type":"mcq","question":"Which phrase asks someone's name?","options":["Wie heißt du?","Wie geht's?","Bis bald","Danke"],"answer":"Wie heißt du?"},
-      {"type":"mcq","question":"Which means 'Pleased to meet you'?","options":["Freut mich","Tschüss","Nein","Ja"],"answer":"Freut mich"}
-    ]
-  },
-  {
-    "lesson_id": 2,
-    "title": "Common Phrases Quiz (20 Qs)",
-    "content": [
-      {"type":"mcq","question":"What is 'Please' in German?","options":["Bitte","Danke","Hallo","Tschüss"],"answer":"Bitte"},
-      {"type":"mcq","question":"Which means 'Excuse me'?","options":["Entschuldigung","Guten Tag","Bis bald","Guten Abend"],"answer":"Entschuldigung"},
-      {"type":"fill","question":"Translate 'I'm sorry'","answer":"Es tut mir leid"},
-      {"type":"mcq","question":"Which means 'I don't understand'?","options":["Ich verstehe nicht","Wie alt bist du?","Ich heiße...","Willkommen"],"answer":"Ich verstehe nicht"},
-      {"type":"mcq","question":"Which says 'What is your name?'","options":["Wie heißt du?","Wie geht's?","Guten Morgen","Tschüss"],"answer":"Wie heißt du?"},
-      {"type":"fill","question":"Translate: 'Where are you from?'","answer":"Woher kommst du?"},
-      {"type":"mcq","question":"Which means 'I am from...'?","options":["Ich komme aus...","Ich heiße...","Wie alt bist du?","Mir geht es gut"],"answer":"Ich komme aus..."},
-      {"type":"truefalse","question":"True or False: 'Bitte' means 'Thank you'","answer":false},
-      {"type":"mcq","question":"Which response means 'You're welcome'?","options":["Gern geschehen","Danke","Bitte","Tschüss"],"answer":"Gern geschehen"},
-      {"type":"mcq","question":"Which means 'Can you help me?'","options":["Können Sie mir helfen?","Wie heißt du?","Ich bin fine","Gute Nacht"],"answer":"Können Sie mir helfen?"},
-      {"type":"fill","question":"Translate: 'How old are you?'","answer":"Wie alt bist du?"},
-      {"type":"mcq","question":"Which is polite for 'Please help'?","options":["Bitte helfen Sie mir","Guten Morgen","Bis bald","Tschüss"],"answer":"Bitte helfen Sie mir"},
-      {"type":"mcq","question":"Which is 'I would like' in German?","options":["Ich möchte","Ich heiße","Ich komme aus","Ich verstehe"],"answer":"Ich möchte"},
-      {"type":"fill","question":"Fill: 'Do you speak English?' -> (German)","answer":"Sprechen Sie Englisch?"},
-      {"type":"mcq","question":"Which means 'Where is the bathroom?'","options":["Wo ist die Toilette?","Wie heißt du?","Ich heiße...","Guten Tag"],"answer":"Wo ist die Toilette?"},
-      {"type":"mcq","question":"Which means 'How much is this?'","options":["Wie viel kostet das?","Wie alt bist du?","Wie geht's?","Auf Wiedersehen"],"answer":"Wie viel kostet das?"},
-      {"type":"fill","question":"Translate: 'I don't speak German well'","answer":"Ich spreche nicht gut Deutsch"},
-      {"type":"mcq","question":"Which phrase asks for the bill?","options":["Die Rechnung, bitte","Danke schön","Guten Morgen","Bis dann"],"answer":"Die Rechnung, bitte"},
-      {"type":"mcq","question":"Which is used to apologize?","options":["Entschuldigung","Danke","Bitte","Ja"],"answer":"Entschuldigung"},
-      {"type":"mcq","question":"Which means 'I understand a little'?","options":["Ich verstehe ein bisschen","Ich verstehe nicht","Ich heiße...","Mir geht es gut"],"answer":"Ich verstehe ein bisschen"}
-    ]
-  }
-]
+{
+  "quizzes": [
+    {
+      "quiz_id": 1,
+      "title": "Basic Greetings Quiz 1",
+      "questions": [
+        {
+          "question": "How do you say 'Hello' in German?",
+          "options": ["Hallo", "Tschüss", "Bitte", "Danke"],
+          "answer": "Hallo"
+        }
+      ]
+    },
+    {
+      "quiz_id": 2,
+      "title": "Basic Greetings Quiz 2",
+      "questions": [
+        {
+          "question": "How do you say 'Good morning' in German?",
+          "options": ["Guten Morgen", "Gute Nacht", "Danke", "Bitte"],
+          "answer": "Guten Morgen"
+        }
+      ]
+    },
+    {
+      "quiz_id": 3,
+      "title": "Basic Greetings Quiz 3",
+      "questions": [
+        {
+          "question": "How do you say 'Good evening' in German?",
+          "options": ["Guten Abend", "Gute Nacht", "Hallo", "Bitte"],
+          "answer": "Guten Abend"
+        }
+      ]
+    },
+    {
+      "quiz_id": 4,
+      "title": "Basic Greetings Quiz 4",
+      "questions": [
+        {
+          "question": "How do you say 'Good night' in German?",
+          "options": ["Gute Nacht", "Guten Tag", "Danke", "Bitte"],
+          "answer": "Gute Nacht"
+        }
+      ]
+    },
+    {
+      "quiz_id": 5,
+      "title": "Basic Greetings Quiz 5",
+      "questions": [
+        {
+          "question": "How do you say 'Good day' in German?",
+          "options": ["Guten Tag", "Guten Morgen", "Hallo", "Tschüss"],
+          "answer": "Guten Tag"
+        }
+      ]
+    },
+    {
+      "quiz_id": 6,
+      "title": "Basic Greetings Quiz 6",
+      "questions": [
+        {
+          "question": "How do you say 'Goodbye' in German?",
+          "options": ["Tschüss", "Bitte", "Hallo", "Danke"],
+          "answer": "Tschüss"
+        }
+      ]
+    },
+    {
+      "quiz_id": 7,
+      "title": "Basic Greetings Quiz 7",
+      "questions": [
+        {
+          "question": "How do you say 'See you later' in German?",
+          "options": ["Bis später", "Auf Wiedersehen", "Hallo", "Danke"],
+          "answer": "Bis später"
+        }
+      ]
+    },
+    {
+      "quiz_id": 8,
+      "title": "Basic Greetings Quiz 8",
+      "questions": [
+        {
+          "question": "How do you say 'See you tomorrow' in German?",
+          "options": ["Bis morgen", "Bis bald", "Gute Nacht", "Hallo"],
+          "answer": "Bis morgen"
+        }
+      ]
+    },
+    {
+      "quiz_id": 9,
+      "title": "Basic Greetings Quiz 9",
+      "questions": [
+        {
+          "question": "How do you say 'See you soon' in German?",
+          "options": ["Bis bald", "Tschüss", "Danke", "Bitte"],
+          "answer": "Bis bald"
+        }
+      ]
+    },
+    {
+      "quiz_id": 10,
+      "title": "Basic Greetings Quiz 10",
+      "questions": [
+        {
+          "question": "How do you say 'Welcome' in German?",
+          "options": ["Willkommen", "Hallo", "Danke", "Bitte"],
+          "answer": "Willkommen"
+        }
+      ]
+    },
+    {
+      "quiz_id": 11,
+      "title": "Common Phrases Quiz 1",
+      "questions": [
+        {
+          "question": "How do you say 'Thank you' in German?",
+          "options": ["Bitte", "Danke", "Tschüss", "Hallo"],
+          "answer": "Danke"
+        }
+      ]
+    },
+    {
+      "quiz_id": 12,
+      "title": "Common Phrases Quiz 2",
+      "questions": [
+        {
+          "question": "How do you say 'You're welcome' in German?",
+          "options": ["Bitte", "Danke", "Hallo", "Tschüss"],
+          "answer": "Bitte"
+        }
+      ]
+    },
+    {
+      "quiz_id": 13,
+      "title": "Common Phrases Quiz 3",
+      "questions": [
+        {
+          "question": "How do you say 'Excuse me' in German?",
+          "options": ["Entschuldigung", "Bitte", "Danke", "Hallo"],
+          "answer": "Entschuldigung"
+        }
+      ]
+    },
+    {
+      "quiz_id": 14,
+      "title": "Common Phrases Quiz 4",
+      "questions": [
+        {
+          "question": "How do you say 'Please' in German?",
+          "options": ["Bitte", "Danke", "Tschüss", "Hallo"],
+          "answer": "Bitte"
+        }
+      ]
+    },
+    {
+      "quiz_id": 15,
+      "title": "Common Phrases Quiz 5",
+      "questions": [
+        {
+          "question": "How do you say 'Yes' in German?",
+          "options": ["Ja", "Nein", "Bitte", "Danke"],
+          "answer": "Ja"
+        }
+      ]
+    },
+    {
+      "quiz_id": 16,
+      "title": "Common Phrases Quiz 6",
+      "questions": [
+        {
+          "question": "How do you say 'No' in German?",
+          "options": ["Nein", "Ja", "Bitte", "Danke"],
+          "answer": "Nein"
+        }
+      ]
+    },
+    {
+      "quiz_id": 17,
+      "title": "Common Phrases Quiz 7",
+      "questions": [
+        {
+          "question": "How do you say 'How are you?' in German?",
+          "options": ["Wie geht's?", "Was ist das?", "Hallo", "Danke"],
+          "answer": "Wie geht's?"
+        }
+      ]
+    },
+    {
+      "quiz_id": 18,
+      "title": "Common Phrases Quiz 8",
+      "questions": [
+        {
+          "question": "How do you say 'I am fine' in German?",
+          "options": ["Mir geht's gut", "Hallo", "Danke", "Bitte"],
+          "answer": "Mir geht's gut"
+        }
+      ]
+    },
+    {
+      "quiz_id": 19,
+      "title": "Common Phrases Quiz 9",
+      "questions": [
+        {
+          "question": "How do you say 'What is your name?' in German?",
+          "options": ["Wie heißt du?", "Hallo", "Danke", "Bitte"],
+          "answer": "Wie heißt du?"
+        }
+      ]
+    },
+    {
+      "quiz_id": 20,
+      "title": "Common Phrases Quiz 10",
+      "questions": [
+        {
+          "question": "How do you say 'My name is...' in German?",
+          "options": ["Ich heiße...", "Hallo", "Danke", "Bitte"],
+          "answer": "Ich heiße..."
+        }
+      ]
+    }
+  ]
+}
