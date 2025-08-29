@@ -285,33 +285,44 @@ elif page == "Quiz":
 
 
 # ---------- Chatbot ----------
+# ---------- Chatbot ----------
 elif page == "Chatbot":
     import requests
-    st.header("🤖 German Chatbot")
+    import streamlit as st
 
-    # Initialize session state for chat history if not already present
+    st.header("🤖 German Chatbot")
+    st.write("Chat with a free German AI assistant!")
+
+    # Initialize chat history
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Function to send messages to OpenAssistant API
+    # Function to send user message to OpenAssistant
     def send_message_to_openassistant(message: str):
+        url = "https://api.openassistantgpt.io/v1/chat/completions"
         headers = {"Content-Type": "application/json"}
         data = {
             "messages": [{"role": "user", "content": message}],
             "model": "gpt-3.5-turbo",
-            "language": "de",  # Specify German language
+            "language": "de"
         }
         try:
-            response = requests.post("https://api.openassistantgpt.io/v1/chat/completions", json=data, headers=headers)
+            response = requests.post(url, json=data, headers=headers, timeout=10)
             response.raise_for_status()
-            return response.json().get("choices", [{}])[0].get("message", {}).get("content", "No response")
-        except requests.exceptions.RequestException as e:
-            return f"Error: {e}"
+            result = response.json()
+            # Safe access
+            if "choices" in result and len(result["choices"]) > 0:
+                return result["choices"][0].get("message", {}).get("content") or "No response from bot."
+            elif "text" in result:
+                return result["text"]
+            else:
+                return str(result)
+        except Exception as e:
+            return f"Error contacting chatbot API: {e}"
 
-    # Chatbot interface
+    # Input and button
     user_input = st.text_input("You:", key="chat_input")
-
-    if st.button("Send") and user_input:
+    if st.button("Send") and user_input.strip():
         st.session_state.chat_history.append(("You", user_input))
         bot_reply = send_message_to_openassistant(user_input)
         st.session_state.chat_history.append(("Bot", bot_reply))
