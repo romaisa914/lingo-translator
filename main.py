@@ -285,7 +285,6 @@ elif page == "Quiz":
 
 
 # ---------- Chatbot ----------
-# ---------- Chatbot ----------
 elif page == "Chatbot":
     import requests
     import streamlit as st
@@ -293,11 +292,9 @@ elif page == "Chatbot":
     st.header("🤖 German Chatbot")
     st.write("Chat with a free German AI assistant!")
 
-    # Initialize chat history
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Function to send user message to OpenAssistant
     def send_message_to_openassistant(message: str):
         url = "https://api.openassistantgpt.io/v1/chat/completions"
         headers = {"Content-Type": "application/json"}
@@ -310,7 +307,6 @@ elif page == "Chatbot":
             response = requests.post(url, json=data, headers=headers, timeout=10)
             response.raise_for_status()
             result = response.json()
-            # Safe access
             if "choices" in result and len(result["choices"]) > 0:
                 return result["choices"][0].get("message", {}).get("content") or "No response from bot."
             elif "text" in result:
@@ -320,13 +316,14 @@ elif page == "Chatbot":
         except Exception as e:
             return f"Error contacting chatbot API: {e}"
 
-    # Input and button
-    user_input = st.text_input("You:", key="chat_input")
-    if st.button("Send") and user_input.strip():
-        st.session_state.chat_history.append(("You", user_input))
-        bot_reply = send_message_to_openassistant(user_input)
-        st.session_state.chat_history.append(("Bot", bot_reply))
-        st.experimental_rerun()
+    # ---- Use a form for input ----
+    with st.form(key="chat_form", clear_on_submit=True):
+        user_input = st.text_input("You:")
+        submit = st.form_submit_button("Send")
+        if submit and user_input.strip():
+            st.session_state.chat_history.append(("You", user_input))
+            bot_reply = send_message_to_openassistant(user_input)
+            st.session_state.chat_history.append(("Bot", bot_reply))
 
     # Display chat history
     for sender, message in st.session_state.chat_history:
@@ -334,6 +331,7 @@ elif page == "Chatbot":
             st.markdown(f"**You:** {message}")
         else:
             st.markdown(f"**Bot:** {message}")
+
 
 
 # ---------- Progress page ----------
