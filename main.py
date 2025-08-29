@@ -99,8 +99,19 @@ def translate_text(text: str, target: str = "de"):
         else:
             return {"translated": "Translation not found in local dictionary.", "method": "local_dict"}
 
+
+
 # ---------- Navigation ----------
-page = st.sidebar.selectbox("Navigate", ["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"])
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
+
+page = st.sidebar.selectbox(
+    "Navigate",
+    ["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"],
+    index=["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"].index(st.session_state.page)
+)
+st.session_state.page = page
+
 
 # ---------- Home ----------
 if page == "Home":
@@ -122,6 +133,11 @@ if page == "Home":
                 st.session_state.quiz_for = None
                 st.session_state._selected_lesson = l["lesson_id"]
                 st.experimental_rerun()
+if st.button(f"Open lesson {l['lesson_id']}", key=f"open_{l['lesson_id']}"):
+    st.session_state.quiz_for = None
+    st.session_state._selected_lesson = l["lesson_id"]
+    st.session_state.page = "Lessons"  # switch page
+    st.experimental_rerun()
 
 # ---------- Lessons ----------
 elif page == "Lessons":
