@@ -120,16 +120,21 @@ elif page == "Translator":
                 out = translate_text(text_input, target)
                 st.success(out)
 
-# ---------- Quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
     # prefer quiz from session if opened from lesson page
     default_lesson = st.session_state.get("quiz_for", None)
     quiz_options = [q["lesson_id"] for q in quizzes]
-    sel_id = st.selectbox("Choose lesson quiz", [None] + quiz_options, index=0 if default_lesson is None else quiz_options.index(default_lesson)+1)
+    sel_id = st.selectbox(
+        "Choose lesson quiz",
+        [None] + quiz_options,
+        index=0 if default_lesson is None else quiz_options.index(default_lesson) + 1
+    )
+
     if sel_id:
         quiz = next(q for q in quizzes if q["lesson_id"] == sel_id)
         st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
+
         with st.form("quiz_form"):
             answers = {}
             for i, q in enumerate(quiz["content"]):
@@ -140,26 +145,35 @@ elif page == "Quiz":
                 elif q["type"] == "truefalse":
                     answers[i] = st.selectbox(q["question"], ["True", "False"], key=f"q{i}")
             submitted = st.form_submit_button("Submit Quiz")
+
         if submitted:
             score = 0
             total = len(quiz["content"])
+
+            st.write("### Results")
             for i, q in enumerate(quiz["content"]):
-                user_a = answers.get(i, "")
-                if q["type"] == "mcq":
-                    if str(user_a).strip().lower() == str(q["answer"]).strip().lower():
-                        score += 1
-                elif q["type"] == "fill":
-                    if str(user_a).strip().lower() == str(q["answer"]).strip().lower():
-                        score += 1
-                elif q["type"] == "truefalse":
-                    correct = "True" if q["answer"] else "False"
-                    if user_a == correct:
-                        score += 1
-            st.success(f"Score: {score} / {total}")
+                user_a = str(answers.get(i, "")).strip().lower()
+                correct_a = str(q["answer"]).strip().lower()
+
+                if q["type"] == "truefalse":
+                    correct_a = "true" if q["answer"] else "false"
+
+                if user_a == correct_a:
+                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
+                    score += 1
+                else:
+                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
+                    st.info(f"Correct answer: **{q['answer']}**")
+
+            # show final score
+            st.write("---")
+            st.success(f"Final Score: {score} / {total}")
+
             # Mark lesson complete if passed >= 50%
-            if score/total >= 0.5:
+            if score / total >= 0.5:
                 st.session_state.completed.add(sel_id)
                 st.info("Lesson marked complete because you passed the quiz ✅")
+
 
 # ---------- Chatbot ----------
 elif page == "Chatbot":
