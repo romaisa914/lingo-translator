@@ -1,0 +1,30 @@
+[
+  {
+    "lesson_id": 1,
+    "title": "Basic Greetings Quiz",
+    "content": [
+      {
+        "type": "mcq",
+        "question": "What is 'Hello' in German?",
+        "options": ["Hallo", "Tschüss", "Bitte", "Danke"],
+        "answer": "Hallo"
+      },
+      {
+        "type": "fill",
+        "question": "Fill in: Good ___ (morning)",
+        "answer": "Morgen"
+      }
+    ]
+  },
+  {
+    "lesson_id": 2,
+    "title": "Common Phrases Quiz",
+    "content": [
+      {
+        "type": "truefalse",
+        "question": "True or False: 'Danke' means 'Please'",
+        "answer": false
+      }
+    ]
+  }
+]
