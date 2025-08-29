@@ -297,6 +297,7 @@ elif page == "Chatbot":
 
 # ---------- Progress page ----------
 
+# ---------- Progress page ----------
 elif page == "Progress":
     st.header("📈 Your Progress")
 
@@ -311,16 +312,22 @@ elif page == "Progress":
     st.markdown("---")
     st.subheader("Lesson Status")
 
-    # Show each lesson and its status
+    # Display each lesson with its completion status
     for l in lessons:
         status = "✅ Completed" if l["lesson_id"] in st.session_state.completed else "◻️ Not started"
-        st.write(f"**Lesson {l['lesson_id']}** — {l['title']} — *{status}*")
+        st.write(f"**Lesson {l['lesson_id']}: {l['title']}** — *{status}*")
 
     st.markdown("---")
+    
     # Reset progress button
     if st.button("Reset progress"):
         st.session_state.completed = set()
         st.success("All lesson progress has been reset.")
+    
+    # Optional: Mark all lessons complete for testing
+    if st.button("Mark all lessons as completed"):
+        st.session_state.completed = {l["lesson_id"] for l in lessons}
+        st.success("All lessons marked as completed ✅")
 
 
 # ---------- Export progress ----------
