@@ -288,7 +288,7 @@ elif page == "Quiz":
 # ---------- Chatbot ----------
 elif page == "Chatbot":
     st.header("🤖 German Chatbot")
-    st.write("Chat with a German language model")
+    st.write("Chat with a friendly German language assistant")
 
     # Initialize chat history
     if "gpt_chat_history" not in st.session_state:
@@ -296,144 +296,109 @@ elif page == "Chatbot":
     if "chat_input_key" not in st.session_state:
         st.session_state.chat_input_key = 0
 
-    # Load model/tokenizer (cached for performance)
+    # Load a more reliable German model
     @st.cache_resource
     def load_german_model():
         try:
-            from transformers import AutoTokenizer, AutoModelForCausalLM
+            from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
             import torch
-            tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
-            model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
-            # Add padding token if it doesn't exist
-            if tokenizer.pad_token is None:
-                tokenizer.pad_token = tokenizer.eos_token
-            return tokenizer, model, torch
+            
+            # Use a translation model that's more reliable for German
+            model_name = "Helsinki-NLP/opus-mt-de-en"
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+            
+            # Create a translation pipeline
+            translator = pipeline("translation", model=model, tokenizer=tokenizer)
+            
+            return translator
         except Exception as e:
             st.error(f"Error loading model: {e}")
-            return None, None, None
+            return None
 
-    tokenizer, model, torch = load_german_model()
+    translator = load_german_model()
 
-    # Function to clean and filter responses
-    def clean_response(response):
-        # Remove any code snippets, URLs, or technical content
-        import re
-        # Remove content between special characters
-        response = re.sub(r'[\[\(<].*?[\]\)>]', '', response)
-        # Remove URLs
-        response = re.sub(r'http\S+', '', response)
-        # Remove code-like content
-        response = re.sub(r'\b\w+::\w+', '', response)
-        response = re.sub(r'\b[A-Z]+\b', '', response)
-        # Remove excessive punctuation
-        response = re.sub(r'[!?]{2,}', '?', response)
-        # Trim and clean up
-        response = response.strip()
-        if not response or len(response) < 3:
-            return "Entschuldigung, ich habe das nicht verstanden. Könnten Sie das anders formulieren?"
-        return response
-
-    # Function to generate response
-    def chat_german(prompt, chat_history=None, max_length=100):
-        if tokenizer is None or model is None or torch is None:
-            # Fallback to rule-based responses if model fails
-            return get_fallback_response(prompt)
-        
-        try:
-            # Create a proper conversation prompt
-            conversation_prompt = "Unterhaltung:\n"
-            if chat_history:
-                for i, msg in enumerate(chat_history[-4:]):  # Last 4 messages for context
-                    if i % 2 == 0:
-                        conversation_prompt += f"Mensch: {msg}\n"
-                    else:
-                        conversation_prompt += f"KI: {msg}\n"
-            
-            conversation_prompt += f"Mensch: {prompt}\nKI:"
-            
-            inputs = tokenizer.encode(conversation_prompt, return_tensors="pt")
-            
-            # Ensure max_length does not exceed model capacity
-            max_model_len = model.config.n_positions
-            if inputs.shape[1] + max_length > max_model_len:
-                max_length = max_model_len - inputs.shape[1] - 1
-            
-            if max_length <= 0:
-                return "Eingabe zu lang. Bitte versuchen Sie eine kürzere Nachricht."
-            
-            with torch.no_grad():
-                outputs = model.generate(
-                    inputs,
-                    max_length=inputs.shape[1] + max_length,
-                    pad_token_id=tokenizer.eos_token_id,
-                    do_sample=True,
-                    temperature=0.8,
-                    top_p=0.9,
-                    repetition_penalty=1.2,
-                    no_repeat_ngram_size=3
-                )
-            
-            full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-            # Extract only the new response part
-            response = full_response[len(conversation_prompt):].strip()
-            
-            # Clean the response
-            cleaned_response = clean_response(response)
-            
-            # If response is still problematic, use fallback
-            if len(cleaned_response.split()) < 2 or any(word in cleaned_response.lower() for word in ["http", "www", ".com", ".de"]):
-                return get_fallback_response(prompt)
-                
-            return cleaned_response
-            
-        except Exception as e:
-            return f"Entschuldigung, ich hatte ein Problem: {str(e)}"
-
-    # Fallback rule-based responses
-    def get_fallback_response(user_input):
+    # Simple rule-based responses in German (primary method)
+    def get_german_response(user_input):
         user_input_lower = user_input.lower()
         
         # Greetings
-        if any(word in user_input_lower for word in ["hallo", "hi", "hello", "guten tag", "moin"]):
-            return "Hallo! Wie geht es Ihnen heute?"
+        if any(word in user_input_lower for word in ["hallo", "hi", "hello", "guten tag", "moin", "guten morgen"]):
+            return "Hallo! Wie geht es dir heute?"
         
         # How are you
         elif "wie geht" in user_input_lower:
-            return "Mir geht es gut, danke der Nachfrage! Und Ihnen?"
+            return "Mir geht es gut, danke der Nachfrage! Und dir?"
         
         # Thanks
-        elif any(word in user_input_lower for word in ["danke", "dankeschön", "danke schön", "thanks"]):
+        elif any(word in user_input_lower for word in ["danke", "dankeschön", "danke schön", "thanks", "thank you"]):
             return "Bitte sehr! Gern geschehen."
         
         # Goodbye
-        elif any(word in user_input_lower for word in ["tschüss", "auf wiedersehen", "bye", "ciao", "tschau"]):
+        elif any(word in user_input_lower for word in ["tschüss", "auf wiedersehen", "bye", "ciao", "tschau", "goodbye"]):
             return "Auf Wiedersehen! Bis zum nächsten Mal."
         
         # What's your name
-        elif any(word in user_input_lower for word in ["wie heißt", "dein name", "wer bist", "name"]):
-            return "Ich bin der Deutsch-Lernbot. Ich helfe Ihnen beim Deutschlernen!"
+        elif any(word in user_input_lower for word in ["wie heißt", "dein name", "wer bist", "name", "what's your name"]):
+            return "Ich bin der Deutsch-Lernbot. Ich helfe dir beim Deutschlernen!"
         
         # Help
-        elif any(word in user_input_lower for word in ["hilfe", "help", "was kannst"]):
-            return "Ich kann mit Ihnen auf Deutsch chatten, um Ihre Sprachkenntnisse zu üben. Probieren Sie doch mal einfache Begrüßungen oder Fragen!"
+        elif any(word in user_input_lower for word in ["hilfe", "help", "was kannst", "what can you do"]):
+            return "Ich kann mit dir auf Deutsch chatten, um deine Sprachkenntnisse zu üben. Probier doch mal einfache Begrüßungen oder Fragen!"
         
         # Questions about liking
-        elif any(word in user_input_lower for word in ["gefall", "magst", "like"]):
-            return "Als KI habe ich keine persönlichen Vorlieben, aber ich helfe Ihnen gerne beim Deutschlernen!"
+        elif any(word in user_input_lower for word in ["gefall", "magst", "like", "do you like"]):
+            return "Als KI habe ich keine persönlichen Vorlieben, aber ich helfe dir gerne beim Deutschlernen!"
         
-        # Default response
-        else:
-            responses = [
-                "Das verstehe ich nicht ganz. Könnten Sie das anders formulieren?",
-                "Interessant! Erzählen Sie mir mehr.",
-                "Das ist eine gute Übung für mein Deutsch!",
-                "Könnten Sie das bitte wiederholen?",
-                "Ich lerne noch. Könnten Sie das einfacher sagen?",
-                "Entschuldigung, ich bin mir nicht sicher, was Sie meinen.",
-                "Das ist eine interessante Frage. Könnten Sie etwas mehr Kontext geben?"
-            ]
-            import random
-            return random.choice(responses)
+        # Language practice requests
+        elif any(word in user_input_lower for word in ["üben", "practice", "lernen", "learn", "deutsch", "german"]):
+            return "Großartig! Lass uns Deutsch üben. Was möchtest du sagen oder fragen?"
+        
+        # Questions about meaning
+        elif any(word in user_input_lower for word in ["was bedeutet", "what does", "meaning", "bedeutung"]):
+            return "Ich kann dir helfen, deutsche Wörter oder Phrasen zu verstehen. Was möchtest du wissen?"
+        
+        # Default responses for common German phrases
+        elif "wie spät" in user_input_lower:
+            return "Ich habe keine Uhr, aber ich hoffe, du bist pünktlich!"
+        elif "woher komm" in user_input_lower:
+            return "Ich komme aus der digitalen Welt des Internets!"
+        elif "wie alt" in user_input_lower:
+            return "Als KI habe ich kein Alter, aber ich lerne jeden Tag dazu!"
+        
+        # Try to use the translation model for other inputs
+        if translator is not None:
+            try:
+                # For non-rule-based inputs, provide a helpful German response
+                english_responses = [
+                    "That's interesting! Tell me more in German.",
+                    "I'm here to help you practice German. What would you like to say?",
+                    "Great! Let's continue our conversation in German.",
+                    "I'm learning from our conversation. What else would you like to talk about?",
+                    "That's a good practice sentence. How about trying another one?"
+                ]
+                import random
+                english_response = random.choice(english_responses)
+                
+                # Translate to German
+                translation = translator(english_response, src_lang="en", tgt_lang="de")
+                return translation[0]['translation_text']
+            except:
+                pass
+        
+        # Final fallback
+        responses = [
+            "Das verstehe ich nicht ganz. Könntest du das anders formulieren?",
+            "Interessant! Erzähl mir mehr.",
+            "Das ist eine gute Übung für mein Deutsch!",
+            "Könntest du das bitte wiederholen?",
+            "Ich lerne noch. Könntest du das einfacher sagen?",
+            "Entschuldigung, ich bin mir nicht sicher, was du meinst.",
+            "Das ist eine interessante Frage. Könntest du etwas mehr Kontext geben?",
+            "Lass uns auf Deutsch weitermachen! Was möchtest du als nächstes sagen?"
+        ]
+        import random
+        return random.choice(responses)
 
     # Display chat history
     for idx, msg in enumerate(st.session_state.gpt_chat_history):
@@ -456,7 +421,7 @@ elif page == "Chatbot":
         st.session_state.gpt_chat_history.append(user_input)
         # Generate bot reply
         with st.spinner("Denke nach..."):
-            bot_reply = chat_german(user_input, st.session_state.gpt_chat_history)
+            bot_reply = get_german_response(user_input)
         st.session_state.gpt_chat_history.append(bot_reply)
         # Increment the key to reset the text input
         st.session_state.chat_input_key += 1
@@ -466,6 +431,26 @@ elif page == "Chatbot":
         st.session_state.gpt_chat_history = []
         st.session_state.chat_input_key += 1
         st.rerun()
+
+    # Add some conversation starters
+    st.write("---")
+    st.write("**Conversation starters:**")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Hallo! Wie geht's?"):
+            st.session_state.gpt_chat_history.append("Hallo! Wie geht's?")
+            st.session_state.gpt_chat_history.append("Hallo! Mir geht es gut, danke! Und dir?")
+            st.rerun()
+    with col2:
+        if st.button("Was machst du?"):
+            st.session_state.gpt_chat_history.append("Was machst du?")
+            st.session_state.gpt_chat_history.append("Ich helfe Menschen, Deutsch zu lernen! Und du?")
+            st.rerun()
+    with col3:
+        if st.button("Danke für die Hilfe"):
+            st.session_state.gpt_chat_history.append("Danke für die Hilfe")
+            st.session_state.gpt_chat_history.append("Gern geschehen! Viel Erfolg beim Deutschlernen!")
+            st.rerun()
 # ---------- Progress page ----------
 # ---------- Progress page ----------
 elif page == "Progress":
