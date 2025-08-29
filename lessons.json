@@ -6,69 +6,157 @@
       {"en": "Hello", "de": "Hallo"},
       {"en": "Good morning", "de": "Guten Morgen"},
       {"en": "Good evening", "de": "Guten Abend"},
+      {"en": "Good night", "de": "Gute Nacht"},
       {"en": "Goodbye", "de": "Auf Wiedersehen"},
+      {"en": "See you later", "de": "Bis später"},
+      {"en": "Welcome", "de": "Willkommen"},
       {"en": "How are you?", "de": "Wie geht's?"},
       {"en": "Nice to meet you", "de": "Schön, dich kennenzulernen"},
-      {"en": "See you soon", "de": "Bis bald"},
-      {"en": "Welcome", "de": "Willkommen"},
-      {"en": "Yes", "de": "Ja"},
-      {"en": "No", "de": "Nein"},
-      {"en": "Good night", "de": "Gute Nacht"},
-      {"en": "See you tomorrow", "de": "Bis morgen"},
-      {"en": "Take care", "de": "Pass auf dich auf"},
-      {"en": "Long time no see", "de": "Lange nicht gesehen"},
-      {"en": "Have a nice day", "de": "Schönen Tag noch"},
-      {"en": "What's up?", "de": "Was geht?"},
-      {"en": "How's it going?", "de": "Wie läuft's?"},
-      {"en": "All the best", "de": "Alles Gute"},
-      {"en": "Have fun", "de": "Viel Spaß"},
-      {"en": "See you later", "de": "Bis später"},
-      {"en": "Welcome back", "de": "Willkommen zurück"},
-      {"en": "Good to see you", "de": "Schön, dich zu sehen"},
-      {"en": "How have you been?", "de": "Wie ist es dir ergangen?"},
-      {"en": "Nice day, isn’t it?", "de": "Schöner Tag, nicht wahr?"},
-      {"en": "Hello everyone", "de": "Hallo zusammen"},
-      {"en": "Pleased to see you", "de": "Freut mich, dich zu sehen"},
-      {"en": "Greetings", "de": "Grüße"},
-      {"en": "Hi there", "de": "Hi"},
-      {"en": "Morning!", "de": "Morgen!"},
-      {"en": "Evening!", "de": "Abend!"}
+      {"en": "Yes", "de": "Ja"}
     ]
   },
   {
     "lesson_id": 2,
-    "title": "Common Phrases",
+    "title": "Advanced Greetings",
     "content": [
-      {"en": "Thank you", "de": "Danke"},
+      {"en": "No", "de": "Nein"},
+      {"en": "Long time no see", "de": "Lange nicht gesehen"},
+      {"en": "How’s everything?", "de": "Wie läuft alles?"},
+      {"en": "How’s life?", "de": "Wie läuft das Leben?"},
+      {"en": "How have you been?", "de": "Wie ist es dir ergangen?"},
+      {"en": "It’s nice seeing you again", "de": "Schön, dich wiederzusehen"},
+      {"en": "Take care", "de": "Mach’s gut"},
+      {"en": "See you tomorrow", "de": "Bis morgen"},
+      {"en": "Catch you later", "de": "Bis dann"},
+      {"en": "Good to see you", "de": "Schön, dich zu sehen"}
+    ]
+  },
+  {
+    "lesson_id": 3,
+    "title": "Basic Phrases",
+    "content": [
       {"en": "Please", "de": "Bitte"},
+      {"en": "Thank you", "de": "Danke"},
       {"en": "Excuse me", "de": "Entschuldigung"},
-      {"en": "I'm sorry", "de": "Es tut mir leid"},
-      {"en": "I don't understand", "de": "Ich verstehe nicht"},
-      {"en": "What is your name?", "de": "Wie heißt du?"},
-      {"en": "My name is...", "de": "Ich heiße..."},
-      {"en": "How old are you?", "de": "Wie alt bist du?"},
-      {"en": "Where are you from?", "de": "Woher kommst du?"},
-      {"en": "I'm from...", "de": "Ich komme aus..."},
-      {"en": "Can you help me?", "de": "Kannst du mir helfen?"},
-      {"en": "I need assistance", "de": "Ich brauche Hilfe"},
-      {"en": "How much is this?", "de": "Wie viel kostet das?"},
-      {"en": "Where is the bathroom?", "de": "Wo ist die Toilette?"},
-      {"en": "I am hungry", "de": "Ich habe Hunger"},
-      {"en": "I am thirsty", "de": "Ich habe Durst"},
-      {"en": "I am tired", "de": "Ich bin müde"},
-      {"en": "I like it", "de": "Es gefällt mir"},
-      {"en": "I don’t like it", "de": "Es gefällt mir nicht"},
-      {"en": "Can you repeat that?", "de": "Kannst du das wiederholen?"},
-      {"en": "What time is it?", "de": "Wie spät ist es?"},
-      {"en": "Where do you live?", "de": "Wo wohnst du?"},
-      {"en": "I live in...", "de": "Ich wohne in..."},
-      {"en": "Do you speak English?", "de": "Sprichst du Englisch?"},
-      {"en": "I speak a little German", "de": "Ich spreche ein bisschen Deutsch"},
+      {"en": "I’m sorry", "de": "Es tut mir leid"},
+      {"en": "I don’t understand", "de": "Ich verstehe nicht"},
+      {"en": "Can you repeat?", "de": "Kannst du das wiederholen?"},
+      {"en": "What does this mean?", "de": "Was bedeutet das?"},
       {"en": "I don’t know", "de": "Ich weiß nicht"},
-      {"en": "Can I ask you something?", "de": "Kann ich dich etwas fragen?"},
-      {"en": "Wait a moment", "de": "Warte einen Moment"},
-      {"en": "I’m learning German", "de": "Ich lerne Deutsch"},
-      {"en": "That’s interesting", "de": "Das ist interessant"}
+      {"en": "Help!", "de": "Hilfe!"},
+      {"en": "Okay", "de": "Okay"}
+    ]
+  },
+  {
+    "lesson_id": 4,
+    "title": "Advanced Phrases",
+    "content": [
+      {"en": "I agree", "de": "Ich stimme zu"},
+      {"en": "I disagree", "de": "Ich stimme nicht zu"},
+      {"en": "That’s true", "de": "Das stimmt"},
+      {"en": "That’s not correct", "de": "Das ist nicht richtig"},
+      {"en": "Can you help me?", "de": "Kannst du mir helfen?"},
+      {"en": "I would like this", "de": "Ich möchte das"},
+      {"en": "What do you think?", "de": "Was denkst du?"},
+      {"en": "I’m not sure", "de": "Ich bin nicht sicher"},
+      {"en": "That’s interesting", "de": "Das ist interessant"},
+      {"en": "Exactly", "de": "Genau"}
+    ]
+  },
+  {
+    "lesson_id": 5,
+    "title": "Numbers",
+    "content": [
+      {"en": "One", "de": "Eins"},
+      {"en": "Two", "de": "Zwei"},
+      {"en": "Three", "de": "Drei"},
+      {"en": "Four", "de": "Vier"},
+      {"en": "Five", "de": "Fünf"},
+      {"en": "Six", "de": "Sechs"},
+      {"en": "Seven", "de": "Sieben"},
+      {"en": "Eight", "de": "Acht"},
+      {"en": "Nine", "de": "Neun"},
+      {"en": "Ten", "de": "Zehn"}
+    ]
+  },
+  {
+    "lesson_id": 6,
+    "title": "Days of the Week",
+    "content": [
+      {"en": "Monday", "de": "Montag"},
+      {"en": "Tuesday", "de": "Dienstag"},
+      {"en": "Wednesday", "de": "Mittwoch"},
+      {"en": "Thursday", "de": "Donnerstag"},
+      {"en": "Friday", "de": "Freitag"},
+      {"en": "Saturday", "de": "Samstag"},
+      {"en": "Sunday", "de": "Sonntag"},
+      {"en": "Weekend", "de": "Wochenende"},
+      {"en": "Today", "de": "Heute"},
+      {"en": "Tomorrow", "de": "Morgen"}
+    ]
+  },
+  {
+    "lesson_id": 7,
+    "title": "Food and Drinks",
+    "content": [
+      {"en": "Bread", "de": "Brot"},
+      {"en": "Water", "de": "Wasser"},
+      {"en": "Milk", "de": "Milch"},
+      {"en": "Coffee", "de": "Kaffee"},
+      {"en": "Tea", "de": "Tee"},
+      {"en": "Apple", "de": "Apfel"},
+      {"en": "Banana", "de": "Banane"},
+      {"en": "Cheese", "de": "Käse"},
+      {"en": "Rice", "de": "Reis"},
+      {"en": "Soup", "de": "Suppe"}
+    ]
+  },
+  {
+    "lesson_id": 8,
+    "title": "Travel",
+    "content": [
+      {"en": "Ticket", "de": "Fahrkarte"},
+      {"en": "Train", "de": "Zug"},
+      {"en": "Bus", "de": "Bus"},
+      {"en": "Airport", "de": "Flughafen"},
+      {"en": "Plane", "de": "Flugzeug"},
+      {"en": "Hotel", "de": "Hotel"},
+      {"en": "Taxi", "de": "Taxi"},
+      {"en": "Station", "de": "Bahnhof"},
+      {"en": "Map", "de": "Karte"},
+      {"en": "Luggage", "de": "Gepäck"}
+    ]
+  },
+  {
+    "lesson_id": 9,
+    "title": "Family",
+    "content": [
+      {"en": "Mother", "de": "Mutter"},
+      {"en": "Father", "de": "Vater"},
+      {"en": "Brother", "de": "Bruder"},
+      {"en": "Sister", "de": "Schwester"},
+      {"en": "Son", "de": "Sohn"},
+      {"en": "Daughter", "de": "Tochter"},
+      {"en": "Uncle", "de": "Onkel"},
+      {"en": "Aunt", "de": "Tante"},
+      {"en": "Grandmother", "de": "Großmutter"},
+      {"en": "Grandfather", "de": "Großvater"}
+    ]
+  },
+  {
+    "lesson_id": 10,
+    "title": "Colors",
+    "content": [
+      {"en": "Red", "de": "Rot"},
+      {"en": "Blue", "de": "Blau"},
+      {"en": "Green", "de": "Grün"},
+      {"en": "Yellow", "de": "Gelb"},
+      {"en": "Black", "de": "Schwarz"},
+      {"en": "White", "de": "Weiß"},
+      {"en": "Gray", "de": "Grau"},
+      {"en": "Orange", "de": "Orange"},
+      {"en": "Pink", "de": "Rosa"},
+      {"en": "Brown", "de": "Braun"}
     ]
   }
 ]
