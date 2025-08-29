@@ -1,0 +1,34 @@
+[
+  {
+    "lesson_id": 1,
+    "title": "Basic Greetings",
+    "content": [
+      {"en": "Hello", "de": "Hallo"},
+      {"en": "Good morning", "de": "Guten Morgen"},
+      {"en": "Good evening", "de": "Guten Abend"},
+      {"en": "Goodbye", "de": "Auf Wiedersehen"},
+      {"en": "How are you?", "de": "Wie geht's?"},
+      {"en": "Nice to meet you", "de": "Schön, dich kennenzulernen"},
+      {"en": "See you soon", "de": "Bis bald"},
+      {"en": "Welcome", "de": "Willkommen"},
+      {"en": "Yes", "de": "Ja"},
+      {"en": "No", "de": "Nein"}
+    ]
+  },
+  {
+    "lesson_id": 2,
+    "title": "Common Phrases",
+    "content": [
+      {"en": "Thank you", "de": "Danke"},
+      {"en": "Please", "de": "Bitte"},
+      {"en": "Excuse me", "de": "Entschuldigung"},
+      {"en": "I'm sorry", "de": "Es tut mir leid"},
+      {"en": "I don't understand", "de": "Ich verstehe nicht"},
+      {"en": "What is your name?", "de": "Wie heißt du?"},
+      {"en": "My name is...", "de": "Ich heiße..."},
+      {"en": "How old are you?", "de": "Wie alt bist du?"},
+      {"en": "Where are you from?", "de": "Woher kommst du?"},
+      {"en": "I'm from...", "de": "Ich komme aus..."}
+    ]
+  }
+]
