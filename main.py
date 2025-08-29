@@ -301,22 +301,22 @@ elif page == "Chatbot":
     def load_german_model():
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            import torch
+            import torch  # Import torch here
             tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
             model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
             # Add padding token if it doesn't exist
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
-            return tokenizer, model
+            return tokenizer, model, torch  # Return torch as well
         except Exception as e:
             st.error(f"Error loading model: {e}")
-            return None, None
+            return None, None, None
 
-    tokenizer, model = load_german_model()
+    tokenizer, model, torch = load_german_model()
 
     # Function to generate response
     def chat_german(prompt, chat_history=None, max_length=100):
-        if tokenizer is None or model is None:
+        if tokenizer is None or model is None or torch is None:
             return "Model not available. Please check the logs for errors."
         
         try:
