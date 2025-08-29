@@ -286,60 +286,57 @@ elif page == "Quiz":
 
 # ---------- Chatbot ----------
 # ---------- Chatbot ----------
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
-import streamlit as st
+elif page == "Chatbot":
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# Load model and tokenizer once
-@st.cache_resource
-def load_german_model():
-    tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
-    model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
-    return tokenizer, model
+    # Load model and tokenizer once
+    @st.cache_resource
+    def load_german_model():
+        tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
+        model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
+        return tokenizer, model
 
-tokenizer, model = load_german_model()
+    tokenizer, model = load_german_model()
 
-# Initialize chat history
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+    # Initialize chat history
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-# Chat generation function
-def chat_german(prompt, chat_history=None, max_length=100):
-    if chat_history:
-        prompt = " ".join(chat_history) + " " + prompt
+    # Chat generation function
+    def chat_german(prompt, chat_history=None, max_length=100):
+        full_prompt = " ".join(chat_history) + " " + prompt if chat_history else prompt
+        inputs = tokenizer.encode(full_prompt, return_tensors="pt")
+        outputs = model.generate(
+            inputs,
+            max_length=max_length,
+            pad_token_id=tokenizer.eos_token_id,
+            do_sample=True,
+            top_k=50,
+            top_p=0.95,
+            temperature=0.7
+        )
+        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        # Remove prompt from response
+        response = response[len(full_prompt):].strip()
+        return response if response else "Ich weiß nicht, was ich antworten soll."
 
-    inputs = tokenizer.encode(prompt, return_tensors="pt")
-    outputs = model.generate(
-        inputs,
-        max_length=max_length,
-        pad_token_id=tokenizer.eos_token_id,
-        do_sample=True,
-        top_k=50,
-        top_p=0.95,
-        temperature=0.7
-    )
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # Remove the prompt part from response
-    response = response[len(prompt):].strip()
-    return response if response else "Ich weiß nicht, was ich antworten soll."
+    # Streamlit interface
+    st.header("🤖 German Chatbot")
+    user_input = st.text_input("You:", key="chat_input")
 
-# Streamlit interface
-st.header("🤖 German Chatbot")
-user_input = st.text_input("You:", key="chat_input")
+    if st.button("Send") and user_input.strip():
+        st.session_state.chat_history.append(user_input)
+        bot_reply = chat_german(user_input, st.session_state.chat_history)
+        st.session_state.chat_history.append(bot_reply)
+        st.experimental_rerun()
 
-if st.button("Send") and user_input.strip():
-    st.session_state.chat_history.append(user_input)
-    bot_reply = chat_german(user_input, st.session_state.chat_history)
-    st.session_state.chat_history.append(bot_reply)
-    st.experimental_rerun()
-
-# Display chat history
-for i, msg in enumerate(st.session_state.chat_history):
-    if i % 2 == 0:
-        st.markdown(f"**You:** {msg}")
-    else:
-        st.markdown(f"**Bot:** {msg}")
-
+    # Display chat history
+    for i, msg in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.markdown(f"**You:** {msg}")
+        else:
+            st.markdown(f"**Bot:** {msg}")
 
 
 # ---------- Progress page ----------
