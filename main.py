@@ -88,17 +88,26 @@ if page == "Home":
 
 # ---------- Lessons page ----------
 elif page == "Lessons":
-import json
-import streamlit as st
+    import json
+    import streamlit as st
 
-# ================== LOAD LESSONS ==================
-with open("lessons.json", "r", encoding="utf-8") as f:
-    lessons = json.load(f)   # ✅ load ALL lessons (no slicing)
+    # ================== LOAD LESSONS ==================
+    with open("lessons.json", "r", encoding="utf-8") as f:
+        lessons = json.load(f)   # ✅ load ALL lessons (no slicing)
 
-# Map lesson_id → lesson for quick lookup
-lesson_map = {l["lesson_id"]: l for l in lessons}
+    # Map lesson_id → lesson for quick lookup
+    lesson_map = {l["lesson_id"]: l for l in lessons}
 
-  st.header("📚 Lessons")
+    # ================== SESSION STATE ==================
+    if "completed" not in st.session_state:
+        st.session_state.completed = set()
+    if "quiz_for" not in st.session_state:
+        st.session_state.quiz_for = None
+    if "_selected_lesson" not in st.session_state:
+        st.session_state._selected_lesson = None
+
+    # ================== LESSONS PAGE ==================
+    st.header("📚 Lessons")
 
     # Build lesson labels
     lesson_labels = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
@@ -109,23 +118,12 @@ lesson_map = {l["lesson_id"]: l for l in lessons}
     preselected = st.session_state.get("_selected_lesson")
     if preselected is not None:
         try:
-            target_label = next(lbl for lbl in lesson_labels
-                                if label_to_id[lbl] == preselected)
+            target_label = next(lbl for lbl in lesson_labels if label_to_id[lbl] == preselected)
             default_index = lesson_labels.index(target_label) + 1
         except StopIteration:
             default_index = 0
         finally:
             st.session_state._selected_lesson = None
-
-# ================== SESSION STATE ==================
-if "completed" not in st.session_state:
-    st.session_state.completed = set()
-if "quiz_for" not in st.session_state:
-    st.session_state.quiz_for = None
-if "_selected_lesson" not in st.session_state:
-    st.session_state._selected_lesson = None
-
-
 
     # ---- Single lesson dropdown ----
     sel = st.selectbox(
@@ -171,9 +169,6 @@ if "_selected_lesson" not in st.session_state:
                 st.session_state.quiz_for = l["lesson_id"]
                 st.success("Quiz selected — open the Quiz tab.")
                 st.experimental_rerun()
-
-
-
 
 
 
