@@ -293,12 +293,15 @@ elif page == "Chatbot":
     # Initialize chat history
     if "gpt_chat_history" not in st.session_state:
         st.session_state.gpt_chat_history = []
+    if "chat_input_key" not in st.session_state:
+        st.session_state.chat_input_key = 0
 
     # Load model/tokenizer (cached for performance)
     @st.cache_resource
     def load_german_model():
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM
+            import torch
             tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
             model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
             # Add padding token if it doesn't exist
@@ -354,28 +357,30 @@ elif page == "Chatbot":
         else:
             st.markdown(f"**Bot:** {msg}")
 
-    # User input at the bottom
-    user_input = st.text_input("You:", key="gpt_chat_input", value="")
+    # User input at the bottom - use a form to handle input properly
+    with st.form("chat_form", clear_on_submit=True):
+        user_input = st.text_input("You:", key=f"chat_input_{st.session_state.chat_input_key}")
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            submitted = st.form_submit_button("Send")
+        with col2:
+            clear_chat = st.form_submit_button("Clear Chat")
     
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        if st.button("Send") and user_input.strip():
-            # Append user message
-            st.session_state.gpt_chat_history.append(user_input)
-            # Generate bot reply
-            with st.spinner("Thinking..."):
-                bot_reply = chat_german(user_input, st.session_state.gpt_chat_history)
-            st.session_state.gpt_chat_history.append(bot_reply)
-            # Clear input by updating session state
-            st.session_state.gpt_chat_input = ""
-            # Rerun to update the display
-            st.rerun()
+    if submitted and user_input.strip():
+        # Append user message
+        st.session_state.gpt_chat_history.append(user_input)
+        # Generate bot reply
+        with st.spinner("Thinking..."):
+            bot_reply = chat_german(user_input, st.session_state.gpt_chat_history)
+        st.session_state.gpt_chat_history.append(bot_reply)
+        # Increment the key to reset the text input
+        st.session_state.chat_input_key += 1
+        st.rerun()
     
-    with col2:
-        if st.button("Clear Chat"):
-            st.session_state.gpt_chat_history = []
-            st.session_state.gpt_chat_input = ""
-            st.rerun()
+    if clear_chat:
+        st.session_state.gpt_chat_history = []
+        st.session_state.chat_input_key += 1
+        st.rerun()
 
 # ---------- Progress page ----------
 # ---------- Progress page ----------
