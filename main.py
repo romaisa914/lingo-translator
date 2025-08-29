@@ -120,55 +120,53 @@ elif page == "Translator":
                 out = translate_text(text_input, target)
                 st.success(out)
 # ---------- quiz ----------
+# ---------- quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
 
-    # list of single-question quizzes
-    quiz_options = [sq["quiz_id"] for sq in single_quizzes]
+    # list quiz titles
+    quiz_options = [f"{q['lesson_id']} — {q['title']}" for q in quizzes]
 
-    sel_id = st.selectbox("Choose quiz", [None] + quiz_options)
+    sel = st.selectbox("Choose quiz", ["-- choose --"] + quiz_options)
 
-    if sel_id:
-        quiz = next(sq for sq in single_quizzes if sq["quiz_id"] == sel_id)
-        qdata = quiz["content"][0]
+    if sel and sel != "-- choose --":
+        # get lesson_id from selection
+        lesson_id = int(sel.split(" — ")[0])
+        quiz = next(q for q in quizzes if q["lesson_id"] == lesson_id)
 
-        st.subheader(f"Quiz — Lesson {quiz['lesson_id']} — {sel_id}")
+        st.subheader(f"Quiz — Lesson {quiz['lesson_id']} — {quiz['title']}")
 
-        with st.form("quiz_form"):
-            answer = None
+        # Loop over all questions
+        for i, qdata in enumerate(quiz["content"], start=1):
+            with st.form(f"quiz_form_{i}"):
+                st.write(f"**Q{i}. {qdata['question']}**")
+                answer = None
 
-            if qdata["type"] == "mcq":
-                answer = st.radio(
-                    "Choose your answer",
-                    qdata["options"],
-                    key=f"{sel_id}_mcq"
-                )
+                if qdata["type"] == "mcq":
+                    answer = st.radio("Choose your answer", qdata["options"], key=f"{i}_mcq")
 
-            elif qdata["type"] == "fill":
-                answer = st.text_input("Your answer", key=f"{sel_id}_fill")
+                elif qdata["type"] == "fill":
+                    answer = st.text_input("Your answer", key=f"{i}_fill")
 
-            elif qdata["type"] == "truefalse":
-                answer = st.selectbox(
-                    "True or False?",
-                    ["True", "False"],
-                    key=f"{sel_id}_tf"
-                )
+                elif qdata["type"] == "truefalse":
+                    answer = st.selectbox("True or False?", ["True", "False"], key=f"{i}_tf")
 
-            submitted = st.form_submit_button("Submit Quiz")
+                submitted = st.form_submit_button("Submit")
 
-        if submitted:
-            user_a = str(answer).strip().lower()
-            correct_a = str(qdata["answer"]).strip().lower()
+                if submitted:
+                    user_a = str(answer).strip().lower()
+                    correct_a = str(qdata["answer"]).strip().lower()
 
-            if qdata["type"] == "truefalse":
-                correct_a = "true" if qdata["answer"] else "false"
+                    if qdata["type"] == "truefalse":
+                        correct_a = "true" if qdata["answer"] else "false"
 
-            if user_a == correct_a:
-                st.success(f"✅ Correct — {qdata['question']}")
-                st.session_state.completed.add(quiz["lesson_id"])
-            else:
-                st.error(f"❌ Wrong — {qdata['question']}")
-                st.info(f"Correct answer: **{qdata['answer']}**")
+                    if user_a == correct_a:
+                        st.success("✅ Correct!")
+                        st.session_state.completed.add(quiz["lesson_id"])
+                    else:
+                        st.error("❌ Wrong!")
+                        st.info(f"Correct answer: **{qdata['answer']}**")
+
 
 
 
