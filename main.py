@@ -119,113 +119,47 @@ elif page == "Translator":
             with st.spinner("Translating..."):
                 out = translate_text(text_input, target)
                 st.success(out)
+
+# ---------- Quiz page ----------
 elif page == "Quiz":
-    st.header("🧪 Quiz")
-    default_lesson = st.session_state.get("quiz_for", None)
+    import json
 
-    # build options from quizzes.json (all 20)
-    quiz_options = [q["quiz_id"] for q in quizzes]
+    # Load quizzes from JSON file
+    with open("quizzes.json", "r", encoding="utf-8") as f:
+        quiz_data = json.load(f)
 
-    sel_id = st.selectbox(
-        "Choose a quiz",
-        [None] + quiz_options,
-        index=0 if default_lesson is None else quiz_options.index(default_lesson) + 1
-    )
+    quizzes = quiz_data["quizzes"]
 
-    if sel_id:
-        quiz = next(q for q in quizzes if q["quiz_id"] == sel_id)
-        st.subheader(f"{quiz['quiz_id']} — {quiz['title']}")
+    st.subheader("📝 Take a Quiz")
 
-        # 👇 one form per quiz
-        with st.form("quiz_form"):
-            answers = {}
-            for i, q in enumerate(quiz["content"]):
-                st.markdown(f"**Q{i+1}: {q['question']}**")
+    # Create dropdown with all quiz titles (1–20)
+    quiz_titles = [f"{q['quiz_id']}. {q['title']}" for q in quizzes]
+    selected_quiz = st.selectbox("Choose a quiz:", quiz_titles)
 
-                if q["type"] == "mcq":
-                    answers[i] = st.radio(
-                        f"Q{i+1}_mcq", q["options"], key=f"q{i}_mcq"
-                    )
+    # Get the selected quiz object
+    quiz_id = int(selected_quiz.split(".")[0])  # extract quiz_id
+    quiz = next((q for q in quizzes if q["quiz_id"] == quiz_id), None)
 
-                elif q["type"] == "fill":
-                    answers[i] = st.text_input(
-                        f"Q{i+1}_fill", key=f"q{i}_fill"
-                    )
+    if quiz:
+        st.markdown(f"### {quiz['title']}")
+        score = 0
+        total = len(quiz["questions"])
 
-                elif q["type"] == "truefalse":
-                    answers[i] = st.selectbox(
-                        f"Q{i+1}_tf", ["True", "False"], key=f"q{i}_tf"
-                    )
-
-                st.write("---")
-
-            submitted = st.form_submit_button("Submit Quiz")
-
-        if submitted:
-            score = 0
-            total = len(quiz["content"])
-            st.write("### Results")
-
-            for i, q in enumerate(quiz["content"]):
-                user_a = str(answers.get(i, "")).strip().lower()
-                correct_a = str(q["answer"]).strip().lower()
-
-                if q["type"] == "truefalse":
-                    correct_a = "true" if q["answer"] else "false"
-
-                if user_a == correct_a:
-                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
+        for idx, q in enumerate(quiz["questions"], 1):
+            st.write(f"**Q{idx}: {q['question']}**")
+            answer = st.radio(
+                f"Choose your answer for Q{idx}:",
+                q["options"],
+                key=f"q{quiz_id}_{idx}"
+            )
+            if st.button(f"Submit Q{idx}", key=f"submit_{quiz_id}_{idx}"):
+                if answer == q["answer"]:
+                    st.success("✅ Correct!")
                     score += 1
                 else:
-                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
-                    st.info(f"Correct answer: **{q['answer']}**")
+                    st.error(f"❌ Wrong! Correct answer: {q['answer']}")
 
-            st.write("---")
-            st.success(f"Final Score: {score} / {total}")
-
-            if score / total >= 0.5:
-                st.session_state.completed.add(sel_id)
-                st.info("Lesson marked complete because you passed the quiz ✅")
-
-# --- QUIZ SECTION ---
-import json
-
-# Load quizzes from JSON file
-with open("quizzes.json", "r", encoding="utf-8") as f:
-    quiz_data = json.load(f)
-
-quizzes = quiz_data["quizzes"]
-
-st.subheader("📝 Take a Quiz")
-
-# Create dropdown with all quiz titles (1–20)
-quiz_titles = [f"{q['quiz_id']}. {q['title']}" for q in quizzes]
-selected_quiz = st.selectbox("Choose a quiz:", quiz_titles)
-
-# Get the selected quiz object
-quiz_id = int(selected_quiz.split(".")[0])  # extract quiz_id
-quiz = next((q for q in quizzes if q["quiz_id"] == quiz_id), None)
-
-if quiz:
-    st.markdown(f"### {quiz['title']}")
-    score = 0
-    total = len(quiz["questions"])
-
-    for idx, q in enumerate(quiz["questions"], 1):
-        st.write(f"**Q{idx}: {q['question']}**")
-        answer = st.radio(
-            f"Choose your answer for Q{idx}:",
-            q["options"],
-            key=f"q{quiz_id}_{idx}"
-        )
-        if st.button(f"Submit Q{idx}", key=f"submit_{quiz_id}_{idx}"):
-            if answer == q["answer"]:
-                st.success("✅ Correct!")
-                score += 1
-            else:
-                st.error(f"❌ Wrong! Correct answer: {q['answer']}")
-
-    st.info(f"Your final score: {score}/{total}")
+        st.info(f"Your final score: {score}/{total}")
 
 
 
