@@ -1,288 +1,100 @@
 import streamlit as st
 import json
-import requests
-from pathlib import Path
 
-# --- Paths ---
-DATA_DIR = Path(__file__).parent
-LESSONS_FILE = DATA_DIR / "lessons.json"
-QUIZZES_FILE = DATA_DIR / "quizzes.json"
+# ------------------ Load Lessons ------------------
+with open("lessons.json", "r", encoding="utf-8") as f:
+    lessons = json.load(f)
 
-# --- Load data (cached) ---
-@st.cache_data
-def load_lessons():
-    with open(LESSONS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+# ------------------ Load Quizzes ------------------
+with open("quizzes.json", "r", encoding="utf-8") as f:
+    quizzes = json.load(f)
 
-@st.cache_data
-def load_quizzes():
-    with open(QUIZZES_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+# ------------------ Pages ------------------
+def home():
+    st.title("🇩🇪 Lingo Translator")
+    st.subheader("Learn German with Interactive Lessons & Quizzes")
 
-lessons = load_lessons()
-quizzes = load_quizzes()
-lesson_map = {l["lesson_id"]: l for l in lessons}
-quiz_map = {q["lesson_id"]: q for q in quizzes}
+    st.write("📖 **Lessons Section**")
+    if st.button("Open Lessons"):
+        st.session_state.page = "lessons"
 
-# --- session state initialization ---
-if "completed" not in st.session_state:
-    st.session_state.completed = set()
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []  # list of tuples ("You", msg) or ("Bot", msg)
-if "chat_input" not in st.session_state:
-    st.session_state.chat_input = ""
-if "quiz_for" not in st.session_state:
-    st.session_state.quiz_for = None
+    st.write("📝 **Quizzes Section**")
+    if st.button("Take a Quiz"):
+        st.session_state.page = "quizzes"
 
-# --- page config ---
-st.set_page_config(page_title="Lingo Translator", layout="wide")
+def lessons_page():
+    st.title("📖 Lessons")
+    lesson_choice = st.selectbox("Choose a Lesson:", list(lessons.keys()))
+    lesson = lessons[lesson_choice]
+    st.subheader(lesson["title"])
+    for i, item in enumerate(lesson["content"], start=1):
+        st.write(f"{i}. {item['german']} → {item['english']}")
 
-# --- local dictionary (fallback) ---
-LOCAL_DICT = {
-    "hello": "hallo",
-    "good morning": "guten morgen",
-    "thank you": "danke",
-    "please": "bitte",
-    "goodbye": "auf wiedersehen",
-    "how are you?": "wie geht's?",
-    "i am fine": "mir geht es gut",
-    "see you soon": "bis bald",
-    "yes": "ja",
-    "no": "nein",
-    "excuse me": "entschuldigung",
-    "sorry": "entschuldigung",
-    "my name is": "ich heiße"
-}
+    if st.button("⬅️ Back to Home"):
+        st.session_state.page = "home"
 
-# --- translator helper: try multiple endpoints then fallback ---
-TRANSLATE_ENDPOINTS = [
-    "https://libretranslate.com/translate",
-    "https://translate.argosopentech.com/translate"
-]
+def quiz_page():
+    st.title("📝 German Quizzes")
 
-def translate_text(text: str, target: str = "de"):
-    text = text.strip()
-    if not text:
-        return {"translated": "", "method": "empty"}
+    quiz_choice = st.selectbox("Choose a Quiz:", list(quizzes.keys()))
+    quiz = quizzes[quiz_choice]
+    st.subheader(quiz["title"])
 
-    # Try endpoints
-    if requests:
-        for url in TRANSLATE_ENDPOINTS:
-            try:
-                resp = requests.post(url, json={
-                    "q": text,
-                    "source": "auto",
-                    "target": target,
-                    "format": "text"
-                }, timeout=8)
-                if resp.ok:
-                    data = resp.json()
-                    translated = data.get("translatedText") or data.get("translated") or data.get("text")
-                    if translated:
-                        return {"translated": translated, "method": f"api:{url}"}
-            except Exception:
-                # try next endpoint
-                continue
+    # Session states for quiz progress
+    if "current_q" not in st.session_state:
+        st.session_state.current_q = 0
+        st.session_state.score = 0
+        st.session_state.feedback = ""
+        st.session_state.selected_quiz = quiz_choice
 
-    # Fallback to local dictionary
-    if target == "de":
-        translated = LOCAL_DICT.get(text.lower(), None)
-        if translated:
-            return {"translated": translated, "method": "local_dict"}
-        else:
-            return {"translated": "Translation not found in local dictionary.", "method": "local_dict"}
-    else:
-        rev = {v: k for k, v in LOCAL_DICT.items()}
-        translated = rev.get(text.lower(), None)
-        if translated:
-            return {"translated": translated, "method": "local_dict"}
-        else:
-            return {"translated": "Translation not found in local dictionary.", "method": "local_dict"}
+    # Reset if user changes quiz
+    if st.session_state.selected_quiz != quiz_choice:
+        st.session_state.current_q = 0
+        st.session_state.score = 0
+        st.session_state.feedback = ""
+        st.session_state.selected_quiz = quiz_choice
 
-# ---------- Navigation ----------
-page = st.sidebar.selectbox("Navigate", ["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"])
+    questions = quiz["questions"]
+    q_index = st.session_state.current_q
 
-# ---------- Home ----------
-if page == "Home":
-    st.title("🇩🇪 Lingo Translator — Learn German")
-    st.write("A lightweight learning app with lessons, translator, quizzes and a chatbot.")
-    total = len(lessons)
-    completed = len(st.session_state.completed)
-    pct = int((completed / total) * 100) if total else 0
-    st.metric("Progress", f"{completed}/{total}", delta=f"{pct}%")
-    st.progress(pct)
-    st.write("**Available lessons**")
-    cols = st.columns(3)
-    for i, l in enumerate(lessons):
-        with cols[i % 3]:
-            status = "✅ Completed" if l["lesson_id"] in st.session_state.completed else "◻️ Not started"
-            st.subheader(f"Lesson {l['lesson_id']}: {l['title']}")
-            st.write(status)
-            if st.button(f"Open lesson {l['lesson_id']}", key=f"open_{l['lesson_id']}"):
-                st.session_state.quiz_for = None
-                st.session_state._selected_lesson = l["lesson_id"]
+    if q_index < len(questions):
+        q = questions[q_index]
+        st.write(f"**Q{q_index+1}: {q['question']}**")
+
+        user_answer = st.radio("Select your answer:", q["options"], key=f"q{q_index}")
+
+        if st.button("Submit", key=f"submit{q_index}"):
+            if user_answer == q["answer"]:
+                st.session_state.score += 1
+                st.session_state.feedback = "✅ Correct!"
+            else:
+                st.session_state.feedback = f"❌ Wrong! Correct answer: {q['answer']}"
+
+        st.write(st.session_state.feedback)
+
+        if st.session_state.feedback:
+            if st.button("Next", key=f"next{q_index}"):
+                st.session_state.current_q += 1
+                st.session_state.feedback = ""
                 st.experimental_rerun()
-
-# ---------- Lessons ----------
-elif page == "Lessons":
-    st.header("📚 Lessons")
-    lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
-    sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
-    if sel and sel != "-- choose --":
-        lesson_id = int(sel.split()[1].strip(':'))
-        lesson = lesson_map[lesson_id]
-        st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
-        st.write("Practice these words/phrases:")
-        for item in lesson["content"]:
-            st.write(f"- **{item['en']}** → *{item['de']}*")
-            cols = st.columns([6,1])
-            # Add a TTS button inline (browser will do it)
-            if cols[1].button(f"🔊 {item['de']}", key=f"tts_{lesson_id}_{item['de']}"):
-                st.write("")  # placeholder to capture button press; TTS in Streamlit requires st.audio or JS – left simple
-        st.write("")
-        if st.button("Mark lesson complete"):
-            st.session_state.completed.add(lesson_id)
-            st.success("Lesson marked complete ✅")
-        if st.button("Open lesson quiz"):
-            st.session_state.quiz_for = lesson_id
+    else:
+        st.success(f"🎉 Quiz finished! Your score: {st.session_state.score}/{len(questions)}")
+        if st.button("Restart Quiz"):
+            st.session_state.current_q = 0
+            st.session_state.score = 0
+            st.session_state.feedback = ""
             st.experimental_rerun()
 
-# ---------- Translator ----------
-elif page == "Translator":
-    st.header("🔁 Translator")
-    col1, col2 = st.columns([4,1])
-    with col1:
-        text_input = st.text_input("Enter text to translate", key="translate_input")
-    with col2:
-        direction = st.selectbox("Direction", ["English → German", "German → English"], index=0)
-    target = "de" if direction.startswith("English") else "en"
-    if st.button("Translate"):
-        if not text_input.strip():
-            st.warning("Type something to translate.")
-        else:
-            with st.spinner("Translating..."):
-                res = translate_text(text_input, target)
-                st.success(res["translated"])
-                st.caption(f"Method used: {res['method']}")
+    if st.button("⬅️ Back to Home"):
+        st.session_state.page = "home"
 
-# ---------- Quiz ----------
-elif page == "Quiz":
-    st.header("🧪 Quiz")
-    default_lesson = st.session_state.get("quiz_for", None)
-    quiz_options = [q["lesson_id"] for q in quizzes]
-    sel_id = st.selectbox("Choose lesson quiz", [None] + quiz_options, index=0 if default_lesson is None else quiz_options.index(default_lesson)+1)
-    if sel_id:
-        quiz = quiz_map.get(sel_id)
-        lesson_title = lesson_map[sel_id]["title"] if sel_id in lesson_map else ""
-        st.subheader(f"Quiz — Lesson {sel_id} : {lesson_title}")
+# ------------------ Main App ------------------
+if "page" not in st.session_state:
+    st.session_state.page = "home"
 
-        # Create form for questions
-        with st.form(f"quiz_form_{sel_id}"):
-            user_answers = []
-            for i, q in enumerate(quiz["content"]):
-                q_key = f"q_{sel_id}_{i}"
-                if q["type"] == "mcq":
-                    user_ans = st.radio(f"{i+1}. {q['question']}", q["options"], key=q_key)
-                elif q["type"] == "fill":
-                    user_ans = st.text_input(f"{i+1}. {q['question']}", key=q_key)
-                elif q["type"] == "truefalse":
-                    user_ans = st.selectbox(f"{i+1}. {q['question']}", ["True", "False"], key=q_key)
-                else:
-                    user_ans = ""
-                user_answers.append(user_ans)
-            submitted = st.form_submit_button("Submit Quiz")
-        if submitted:
-            score = 0
-            total = len(quiz["content"])
-            st.write("---")
-            for i, q in enumerate(quiz["content"]):
-                user_a = user_answers[i]
-                correct_flag = False
-                correct_display = ""
-                if q["type"] == "mcq":
-                    correct_display = str(q["answer"])
-                    if str(user_a).strip().lower() == str(q["answer"]).strip().lower():
-                        correct_flag = True
-                elif q["type"] == "fill":
-                    correct_display = str(q["answer"])
-                    if str(user_a).strip().lower() == str(q["answer"]).strip().lower():
-                        correct_flag = True
-                elif q["type"] == "truefalse":
-                    correct_display = "True" if q["answer"] else "False"
-                    if user_a == correct_display:
-                        correct_flag = True
-
-                if correct_flag:
-                    score += 1
-                    st.success(f"Q{i+1} Correct — {q['question']}")
-                else:
-                    st.error(f"Q{i+1} Wrong — {q['question']}")
-                    st.info(f"Your answer: **{user_a}**  — Correct answer: **{correct_display}**")
-
-            st.write("---")
-            st.success(f"Score: {score} / {total}")
-            # mark lesson complete if >= 50%
-            if score/total >= 0.5:
-                st.session_state.completed.add(sel_id)
-                st.info("Lesson marked complete because you passed the quiz ✅")
-
-# ---------- Chatbot ----------
-elif page == "Chatbot":
-    st.header("🤖 German Chatbot")
-    st.write("Simple rule-based chatbot — try 'hallo', 'danke', 'hilfe'.")
-    col1, col2 = st.columns([4,1])
-    # Input in left column, send button in right
-    with col1:
-        # uses session_state so clearing works after send
-        user_msg = st.text_input("You:", key="chat_input", value=st.session_state.get("chat_input", ""))
-    with col2:
-        if st.button("Send"):
-            msg = st.session_state.get("chat_input", "").strip()
-            if msg:
-                m = msg.lower()
-                if "hallo" in m:
-                    reply = "Hallo! Wie geht's?"
-                elif "danke" in m:
-                    reply = "Gern geschehen!"
-                elif "tschau" in m or "bye" in m:
-                    reply = "Auf Wiedersehen!"
-                elif "hilfe" in m:
-                    reply = "Ich kann dir bei Deutschübungen helfen!"
-                else:
-                    reply = "Ich verstehe nicht. Bitte versuche es noch einmal."
-                st.session_state.chat_history.append(("You", msg))
-                st.session_state.chat_history.append(("Bot", reply))
-                # clear input
-                st.session_state.chat_input = ""
-                # no experimental_rerun needed; Streamlit will rerun after button click and show updated history
-
-    # Show history (most recent last)
-    for who, text in st.session_state.chat_history:
-        if who == "You":
-            st.markdown(f"**You:** {text}")
-        else:
-            st.markdown(f"**Bot:** {text}")
-
-# ---------- Progress ----------
-elif page == "Progress":
-    st.header("📈 Progress")
-    total = len(lessons)
-    completed = len(st.session_state.completed)
-    pct = int((completed / total) * 100) if total else 0
-    st.write(f"Lessons completed: **{completed} / {total}** ({pct}%)")
-    st.progress(pct)
-    if st.button("Reset progress"):
-        st.session_state.completed = set()
-        st.success("Progress reset.")
-
-# ---------- Export / Import ----------
-elif page == "Export":
-    st.header("📤 Export / Import Progress")
-    progress = {"completed": list(st.session_state.completed)}
-    st.download_button("Download progress (JSON)", json.dumps(progress), file_name="progress.json", mime="application/json")
-    uploaded = st.file_uploader("Upload progress JSON to import", type=["json"])
-    if uploaded:
-        data = json.load(uploaded)
-        comp = data.get("completed", [])
-        st.session_state.completed = set(comp)
-        st.success("Progress imported.")
+if st.session_state.page == "home":
+    home()
+elif st.session_state.page == "lessons":
+    lessons_page()
+elif st.session_state.page == "quizzes":
+    quiz_page()
