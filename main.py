@@ -288,7 +288,7 @@ elif page == "Quiz":
 # ---------- Chatbot ----------
 elif page == "Chatbot":
     st.header("🤖 German Chatbot")
-    st.write("Chat with a German language model (Hugging Face GPT-2)")
+    st.write("Chat with a German language model")
 
     # Initialize chat history
     if "gpt_chat_history" not in st.session_state:
@@ -301,29 +301,57 @@ elif page == "Chatbot":
     def load_german_model():
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            import torch  # Import torch here
+            import torch
             tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
             model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
             # Add padding token if it doesn't exist
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
-            return tokenizer, model, torch  # Return torch as well
+            return tokenizer, model, torch
         except Exception as e:
             st.error(f"Error loading model: {e}")
             return None, None, None
 
     tokenizer, model, torch = load_german_model()
 
+    # Function to clean and filter responses
+    def clean_response(response):
+        # Remove any code snippets, URLs, or technical content
+        import re
+        # Remove content between special characters
+        response = re.sub(r'[\[\(<].*?[\]\)>]', '', response)
+        # Remove URLs
+        response = re.sub(r'http\S+', '', response)
+        # Remove code-like content
+        response = re.sub(r'\b\w+::\w+', '', response)
+        response = re.sub(r'\b[A-Z]+\b', '', response)
+        # Remove excessive punctuation
+        response = re.sub(r'[!?]{2,}', '?', response)
+        # Trim and clean up
+        response = response.strip()
+        if not response or len(response) < 3:
+            return "Entschuldigung, ich habe das nicht verstanden. Könnten Sie das anders formulieren?"
+        return response
+
     # Function to generate response
     def chat_german(prompt, chat_history=None, max_length=100):
         if tokenizer is None or model is None or torch is None:
-            return "Model not available. Please check the logs for errors."
+            # Fallback to rule-based responses if model fails
+            return get_fallback_response(prompt)
         
         try:
-            history_text = " ".join(chat_history[-5:]) if chat_history else ""
-            full_prompt = history_text + " " + prompt if history_text else prompt
+            # Create a proper conversation prompt
+            conversation_prompt = "Unterhaltung:\n"
+            if chat_history:
+                for i, msg in enumerate(chat_history[-4:]):  # Last 4 messages for context
+                    if i % 2 == 0:
+                        conversation_prompt += f"Mensch: {msg}\n"
+                    else:
+                        conversation_prompt += f"KI: {msg}\n"
             
-            inputs = tokenizer.encode(full_prompt, return_tensors="pt")
+            conversation_prompt += f"Mensch: {prompt}\nKI:"
+            
+            inputs = tokenizer.encode(conversation_prompt, return_tensors="pt")
             
             # Ensure max_length does not exceed model capacity
             max_model_len = model.config.n_positions
@@ -331,7 +359,7 @@ elif page == "Chatbot":
                 max_length = max_model_len - inputs.shape[1] - 1
             
             if max_length <= 0:
-                return "Input too long. Please try a shorter message."
+                return "Eingabe zu lang. Bitte versuchen Sie eine kürzere Nachricht."
             
             with torch.no_grad():
                 outputs = model.generate(
@@ -339,16 +367,73 @@ elif page == "Chatbot":
                     max_length=inputs.shape[1] + max_length,
                     pad_token_id=tokenizer.eos_token_id,
                     do_sample=True,
-                    temperature=0.7,
+                    temperature=0.8,
                     top_p=0.9,
-                    repetition_penalty=1.1
+                    repetition_penalty=1.2,
+                    no_repeat_ngram_size=3
                 )
             
-            reply = tokenizer.decode(outputs[0], skip_special_tokens=True)
-            # Return only the new response
-            return reply[len(full_prompt):].strip()
+            full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            # Extract only the new response part
+            response = full_response[len(conversation_prompt):].strip()
+            
+            # Clean the response
+            cleaned_response = clean_response(response)
+            
+            # If response is still problematic, use fallback
+            if len(cleaned_response.split()) < 2 or any(word in cleaned_response.lower() for word in ["http", "www", ".com", ".de"]):
+                return get_fallback_response(prompt)
+                
+            return cleaned_response
+            
         except Exception as e:
-            return f"Error generating response: {str(e)}"
+            return f"Entschuldigung, ich hatte ein Problem: {str(e)}"
+
+    # Fallback rule-based responses
+    def get_fallback_response(user_input):
+        user_input_lower = user_input.lower()
+        
+        # Greetings
+        if any(word in user_input_lower for word in ["hallo", "hi", "hello", "guten tag", "moin"]):
+            return "Hallo! Wie geht es Ihnen heute?"
+        
+        # How are you
+        elif "wie geht" in user_input_lower:
+            return "Mir geht es gut, danke der Nachfrage! Und Ihnen?"
+        
+        # Thanks
+        elif any(word in user_input_lower for word in ["danke", "dankeschön", "danke schön", "thanks"]):
+            return "Bitte sehr! Gern geschehen."
+        
+        # Goodbye
+        elif any(word in user_input_lower for word in ["tschüss", "auf wiedersehen", "bye", "ciao", "tschau"]):
+            return "Auf Wiedersehen! Bis zum nächsten Mal."
+        
+        # What's your name
+        elif any(word in user_input_lower for word in ["wie heißt", "dein name", "wer bist", "name"]):
+            return "Ich bin der Deutsch-Lernbot. Ich helfe Ihnen beim Deutschlernen!"
+        
+        # Help
+        elif any(word in user_input_lower for word in ["hilfe", "help", "was kannst"]):
+            return "Ich kann mit Ihnen auf Deutsch chatten, um Ihre Sprachkenntnisse zu üben. Probieren Sie doch mal einfache Begrüßungen oder Fragen!"
+        
+        # Questions about liking
+        elif any(word in user_input_lower for word in ["gefall", "magst", "like"]):
+            return "Als KI habe ich keine persönlichen Vorlieben, aber ich helfe Ihnen gerne beim Deutschlernen!"
+        
+        # Default response
+        else:
+            responses = [
+                "Das verstehe ich nicht ganz. Könnten Sie das anders formulieren?",
+                "Interessant! Erzählen Sie mir mehr.",
+                "Das ist eine gute Übung für mein Deutsch!",
+                "Könnten Sie das bitte wiederholen?",
+                "Ich lerne noch. Könnten Sie das einfacher sagen?",
+                "Entschuldigung, ich bin mir nicht sicher, was Sie meinen.",
+                "Das ist eine interessante Frage. Könnten Sie etwas mehr Kontext geben?"
+            ]
+            import random
+            return random.choice(responses)
 
     # Display chat history
     for idx, msg in enumerate(st.session_state.gpt_chat_history):
@@ -370,7 +455,7 @@ elif page == "Chatbot":
         # Append user message
         st.session_state.gpt_chat_history.append(user_input)
         # Generate bot reply
-        with st.spinner("Thinking..."):
+        with st.spinner("Denke nach..."):
             bot_reply = chat_german(user_input, st.session_state.gpt_chat_history)
         st.session_state.gpt_chat_history.append(bot_reply)
         # Increment the key to reset the text input
@@ -381,7 +466,6 @@ elif page == "Chatbot":
         st.session_state.gpt_chat_history = []
         st.session_state.chat_input_key += 1
         st.rerun()
-
 # ---------- Progress page ----------
 # ---------- Progress page ----------
 elif page == "Progress":
