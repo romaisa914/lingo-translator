@@ -86,30 +86,26 @@ if page == "Home":
     st.write("---")
     st.info("Tip: Go to the Lessons tab to open a lesson. Mark it complete after practicing.")
 
+
 # ---------- Lessons page ----------
 elif page == "Lessons":
     st.header("📚 Lessons")
-
-    for lesson in lessons:
-        lesson_id = lesson["lesson_id"]
+    lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
+    sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
+    if sel and sel != "-- choose --":
+        lesson_id = int(sel.split()[1].strip(':'))
+        lesson = lesson_map[lesson_id]
         st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
-
         st.write("Practice these words/phrases:")
         for item in lesson["content"]:
             st.write(f"- **{item['en']}** → *{item['de']}*")
-
-        # Buttons for each lesson
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button(f"✅ Mark Lesson {lesson_id} Complete", key=f"complete_{lesson_id}"):
-                st.session_state.completed.add(lesson_id)
-                st.success(f"Lesson {lesson_id} marked complete!")
-        with col2:
-            if st.button(f"📝 Open Lesson {lesson_id} Quiz", key=f"quiz_{lesson_id}"):
-                st.session_state.quiz_for = lesson_id
-                st.experimental_rerun()
-
-        st.markdown("---")
+        st.write("")
+        if st.button("Mark lesson complete"):
+            st.session_state.completed.add(lesson_id)
+            st.success("Lesson marked complete ✅")
+        if st.button("Open lesson quiz"):
+            st.session_state.quiz_for = lesson_id
+            st.experimental_rerun()
 
 
 # ---------- Translator ----------
