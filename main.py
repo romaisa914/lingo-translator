@@ -136,62 +136,61 @@ elif page == "Quiz":
         st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
 
         # show all questions at once
-       with st.form("quiz_form"):
-    answers = {}
-    for i, q in enumerate(quiz["content"]):
-        st.markdown(f"**Q{i+1}: {q['question']}**")
-
-        if q["type"] == "mcq":
-            answers[i] = st.radio(
-                f"Select an answer for Q{i+1}",  # 🔑 unique label
-                q["options"],
-                key=f"q{i}"
-            )
-
-        elif q["type"] == "fill":
-            answers[i] = st.text_input(
-                f"Your answer for Q{i+1}",  # 🔑 unique label
-                key=f"q{i}"
-            )
-
-        elif q["type"] == "truefalse":
-            answers[i] = st.selectbox(
-                f"Choose True/False for Q{i+1}",  # 🔑 unique label
-                ["True", "False"],
-                key=f"q{i}"
-            )
-
-        st.write("---")
-
-    submitted = st.form_submit_button("Submit Quiz")
-
-
-        if submitted:
-            score = 0
-            total = len(quiz["content"])
-            st.write("### Results")
-
+        with st.form("quiz_form"):   # ✅ FIXED INDENTATION
+            answers = {}
             for i, q in enumerate(quiz["content"]):
-                user_a = str(answers.get(i, "")).strip().lower()
-                correct_a = str(q["answer"]).strip().lower()
+                st.markdown(f"**Q{i+1}: {q['question']}**")
 
-                if q["type"] == "truefalse":
-                    correct_a = "true" if q["answer"] else "false"
+                if q["type"] == "mcq":
+                    answers[i] = st.radio(
+                        f"Select an answer for Q{i+1}",
+                        q["options"],
+                        key=f"q{i}"
+                    )
 
-                if user_a == correct_a:
-                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
-                    score += 1
-                else:
-                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
-                    st.info(f"Correct answer: **{q['answer']}**")
+                elif q["type"] == "fill":
+                    answers[i] = st.text_input(
+                        f"Your answer for Q{i+1}",
+                        key=f"q{i}"
+                    )
 
-            # show final score
-            st.write("---")
-            st.success(f"Final Score: {score} / {total}")
+                elif q["type"] == "truefalse":
+                    answers[i] = st.selectbox(
+                        f"Choose True/False for Q{i+1}",
+                        ["True", "False"],
+                        key=f"q{i}"
+                    )
 
-            if score / total >= 0.5:
-                st.session_state.completed.add(sel_id)
-                st.info("Lesson marked complete because you passed the quiz ✅")
+                st.write("---")
+
+            submitted = st.form_submit_button("Submit Quiz")
+
+            if submitted:
+                score = 0
+                total = len(quiz["content"])
+                st.write("### Results")
+
+                for i, q in enumerate(quiz["content"]):
+                    user_a = str(answers.get(i, "")).strip().lower()
+                    correct_a = str(q["answer"]).strip().lower()
+
+                    if q["type"] == "truefalse":
+                        correct_a = "true" if q["answer"] else "false"
+
+                    if user_a == correct_a:
+                        st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
+                        score += 1
+                    else:
+                        st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
+                        st.info(f"Correct answer: **{q['answer']}**")
+
+                # show final score
+                st.write("---")
+                st.success(f"Final Score: {score} / {total}")
+
+                if score / total >= 0.5:
+                    st.session_state.completed.add(sel_id)
+                    st.info("Lesson marked complete because you passed the quiz ✅")
 
 
 
