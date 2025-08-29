@@ -121,35 +121,39 @@ elif page == "Translator":
                 st.success(out)
 # ---------- quiz ----------
 # ---------- quiz ----------
+# ---------- Quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
 
-    # list quiz titles
+    # Build quiz options list (20 quizzes: 1–10 greetings, 11–20 phrases)
     quiz_options = [f"{q['lesson_id']} — {q['title']}" for q in quizzes]
 
     sel = st.selectbox("Choose quiz", ["-- choose --"] + quiz_options)
 
     if sel and sel != "-- choose --":
-        # get lesson_id from selection
-        lesson_id = int(sel.split(" — ")[0])
+        # Extract lesson_id from selection
+        lesson_id = int(sel.split(" — ")[0].strip())
         quiz = next(q for q in quizzes if q["lesson_id"] == lesson_id)
 
         st.subheader(f"Quiz — Lesson {quiz['lesson_id']} — {quiz['title']}")
 
-        # Loop over all questions
+        score = 0
+        total = len(quiz["content"])
+
+        # Loop over all questions in this quiz
         for i, qdata in enumerate(quiz["content"], start=1):
-            with st.form(f"quiz_form_{i}"):
+            with st.form(f"quiz_form_{quiz['lesson_id']}_{i}"):
                 st.write(f"**Q{i}. {qdata['question']}**")
                 answer = None
 
                 if qdata["type"] == "mcq":
-                    answer = st.radio("Choose your answer", qdata["options"], key=f"{i}_mcq")
+                    answer = st.radio("Choose your answer", qdata["options"], key=f"{quiz['lesson_id']}_{i}_mcq")
 
                 elif qdata["type"] == "fill":
-                    answer = st.text_input("Your answer", key=f"{i}_fill")
+                    answer = st.text_input("Your answer", key=f"{quiz['lesson_id']}_{i}_fill")
 
                 elif qdata["type"] == "truefalse":
-                    answer = st.selectbox("True or False?", ["True", "False"], key=f"{i}_tf")
+                    answer = st.selectbox("True or False?", ["True", "False"], key=f"{quiz['lesson_id']}_{i}_tf")
 
                 submitted = st.form_submit_button("Submit")
 
@@ -162,10 +166,18 @@ elif page == "Quiz":
 
                     if user_a == correct_a:
                         st.success("✅ Correct!")
+                        score += 1
                         st.session_state.completed.add(quiz["lesson_id"])
                     else:
                         st.error("❌ Wrong!")
                         st.info(f"Correct answer: **{qdata['answer']}**")
+
+        # Final score
+        if total > 0:
+            st.write("---")
+            st.success(f"Your Score: {score}/{total}")
+            if score == total:
+                st.balloons()
 
 
 
