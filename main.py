@@ -28,11 +28,15 @@ quiz_map = {q["lesson_id"]: q for q in quizzes}
 if "completed" not in st.session_state:
     st.session_state.completed = set()
 if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []  # list of tuples ("You", msg) or ("Bot", msg)
+    st.session_state.chat_history = []
 if "chat_input" not in st.session_state:
     st.session_state.chat_input = ""
 if "quiz_for" not in st.session_state:
     st.session_state.quiz_for = None
+if "_selected_lesson" not in st.session_state:
+    st.session_state._selected_lesson = None
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
 
 # --- page config ---
 st.set_page_config(page_title="Lingo Translator", layout="wide")
@@ -54,7 +58,6 @@ LOCAL_DICT = {
     "my name is": "ich heiße"
 }
 
-# --- translator helper: try multiple endpoints then fallback ---
 TRANSLATE_ENDPOINTS = [
     "https://libretranslate.com/translate",
     "https://translate.argosopentech.com/translate"
@@ -65,7 +68,6 @@ def translate_text(text: str, target: str = "de"):
     if not text:
         return {"translated": "", "method": "empty"}
 
-    # Try endpoints
     if requests:
         for url in TRANSLATE_ENDPOINTS:
             try:
@@ -81,10 +83,8 @@ def translate_text(text: str, target: str = "de"):
                     if translated:
                         return {"translated": translated, "method": f"api:{url}"}
             except Exception:
-                # try next endpoint
                 continue
 
-    # Fallback to local dictionary
     if target == "de":
         translated = LOCAL_DICT.get(text.lower(), None)
         if translated:
@@ -99,19 +99,13 @@ def translate_text(text: str, target: str = "de"):
         else:
             return {"translated": "Translation not found in local dictionary.", "method": "local_dict"}
 
-
-
 # ---------- Navigation ----------
-if "page" not in st.session_state:
-    st.session_state.page = "Home"
-
 page = st.sidebar.selectbox(
     "Navigate",
     ["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"],
     index=["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"].index(st.session_state.page)
 )
 st.session_state.page = page
-
 
 # ---------- Home ----------
 if page == "Home":
@@ -132,43 +126,14 @@ if page == "Home":
             if st.button(f"Open lesson {l['lesson_id']}", key=f"open_{l['lesson_id']}"):
                 st.session_state.quiz_for = None
                 st.session_state._selected_lesson = l["lesson_id"]
+                st.session_state.page = "Lessons"   # auto-switch page
                 st.experimental_rerun()
-if st.button(f"Open lesson {l['lesson_id']}", key=f"open_{l['lesson_id']}"):
-    st.session_state.quiz_for = None
-    st.session_state._selected_lesson = l["lesson_id"]
-    st.session_state.page = "Lessons"  # switch page
-    st.experimental_rerun()
-
-# ---------- Lessons ----------
-elif page == "Lessons":
-    st.header("📚 Lessons")
-    lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
-    sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
-    if sel and sel != "-- choose --":
-        lesson_id = int(sel.split()[1].strip(':'))
-        lesson = lesson_map[lesson_id]
-        st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
-        st.write("Practice these words/phrases:")
-        for item in lesson["content"]:
-            st.write(f"- **{item['en']}** → *{item['de']}*")
-            cols = st.columns([6,1])
-            # Add a TTS button inline (browser will do it)
-            if cols[1].button(f"🔊 {item['de']}", key=f"tts_{lesson_id}_{item['de']}"):
-                st.write("")  # placeholder to capture button press; TTS in Streamlit requires st.audio or JS – left simple
-        st.write("")
-        if st.button("Mark lesson complete"):
-            st.session_state.completed.add(lesson_id)
-            st.success("Lesson marked complete ✅")
-        if st.button("Open lesson quiz"):
-            st.session_state.quiz_for = lesson_id
-            st.experimental_rerun()
 
 # ---------- Lessons ----------
 elif page == "Lessons":
     st.header("📚 Lessons")
 
-    # Check if lesson was selected from Home
-    if "_selected_lesson" in st.session_state and st.session_state._selected_lesson is not None:
+    if st.session_state._selected_lesson:
         lesson_id = st.session_state._selected_lesson
         lesson = lesson_map[lesson_id]
         st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
@@ -177,7 +142,7 @@ elif page == "Lessons":
             st.write(f"- **{item['en']}** → *{item['de']}*")
             cols = st.columns([6,1])
             if cols[1].button(f"🔊 {item['de']}", key=f"tts_{lesson_id}_{item['de']}"):
-                st.write("")  
+                st.write("")
         st.write("")
         if st.button("Mark lesson complete"):
             st.session_state.completed.add(lesson_id)
@@ -187,27 +152,12 @@ elif page == "Lessons":
             st.experimental_rerun()
 
     else:
-        # fallback to manual select
         lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
         sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
         if sel and sel != "-- choose --":
             lesson_id = int(sel.split()[1].strip(':'))
-            lesson = lesson_map[lesson_id]
-            st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
-            st.write("Practice these words/phrases:")
-            for item in lesson["content"]:
-                st.write(f"- **{item['en']}** → *{item['de']}*")
-                cols = st.columns([6,1])
-                if cols[1].button(f"🔊 {item['de']}", key=f"tts_{lesson_id}_{item['de']}"):
-                    st.write("")
-            st.write("")
-            if st.button("Mark lesson complete"):
-                st.session_state.completed.add(lesson_id)
-                st.success("Lesson marked complete ✅")
-            if st.button("Open lesson quiz"):
-                st.session_state.quiz_for = lesson_id
-                st.experimental_rerun()
-
+            st.session_state._selected_lesson = lesson_id
+            st.experimental_rerun()
 
 # ---------- Translator ----------
 elif page == "Translator":
@@ -238,7 +188,6 @@ elif page == "Quiz":
         lesson_title = lesson_map[sel_id]["title"] if sel_id in lesson_map else ""
         st.subheader(f"Quiz — Lesson {sel_id} : {lesson_title}")
 
-        # Create form for questions
         with st.form(f"quiz_form_{sel_id}"):
             user_answers = []
             for i, q in enumerate(quiz["content"]):
@@ -283,7 +232,6 @@ elif page == "Quiz":
 
             st.write("---")
             st.success(f"Score: {score} / {total}")
-            # mark lesson complete if >= 50%
             if score/total >= 0.5:
                 st.session_state.completed.add(sel_id)
                 st.info("Lesson marked complete because you passed the quiz ✅")
@@ -293,9 +241,7 @@ elif page == "Chatbot":
     st.header("🤖 German Chatbot")
     st.write("Simple rule-based chatbot — try 'hallo', 'danke', 'hilfe'.")
     col1, col2 = st.columns([4,1])
-    # Input in left column, send button in right
     with col1:
-        # uses session_state so clearing works after send
         user_msg = st.text_input("You:", key="chat_input", value=st.session_state.get("chat_input", ""))
     with col2:
         if st.button("Send"):
@@ -314,11 +260,8 @@ elif page == "Chatbot":
                     reply = "Ich verstehe nicht. Bitte versuche es noch einmal."
                 st.session_state.chat_history.append(("You", msg))
                 st.session_state.chat_history.append(("Bot", reply))
-                # clear input
                 st.session_state.chat_input = ""
-                # no experimental_rerun needed; Streamlit will rerun after button click and show updated history
 
-    # Show history (most recent last)
     for who, text in st.session_state.chat_history:
         if who == "You":
             st.markdown(f"**You:** {text}")
