@@ -12,7 +12,27 @@
       {"en": "See you soon", "de": "Bis bald"},
       {"en": "Welcome", "de": "Willkommen"},
       {"en": "Yes", "de": "Ja"},
-      {"en": "No", "de": "Nein"}
+      {"en": "No", "de": "Nein"},
+      {"en": "Good night", "de": "Gute Nacht"},
+      {"en": "See you tomorrow", "de": "Bis morgen"},
+      {"en": "Take care", "de": "Pass auf dich auf"},
+      {"en": "Long time no see", "de": "Lange nicht gesehen"},
+      {"en": "Have a nice day", "de": "Schönen Tag noch"},
+      {"en": "What's up?", "de": "Was geht?"},
+      {"en": "How's it going?", "de": "Wie läuft's?"},
+      {"en": "All the best", "de": "Alles Gute"},
+      {"en": "Have fun", "de": "Viel Spaß"},
+      {"en": "See you later", "de": "Bis später"},
+      {"en": "Welcome back", "de": "Willkommen zurück"},
+      {"en": "Good to see you", "de": "Schön, dich zu sehen"},
+      {"en": "How have you been?", "de": "Wie ist es dir ergangen?"},
+      {"en": "Nice day, isn’t it?", "de": "Schöner Tag, nicht wahr?"},
+      {"en": "Hello everyone", "de": "Hallo zusammen"},
+      {"en": "Pleased to see you", "de": "Freut mich, dich zu sehen"},
+      {"en": "Greetings", "de": "Grüße"},
+      {"en": "Hi there", "de": "Hi"},
+      {"en": "Morning!", "de": "Morgen!"},
+      {"en": "Evening!", "de": "Abend!"}
     ]
   },
   {
@@ -28,7 +48,27 @@
       {"en": "My name is...", "de": "Ich heiße..."},
       {"en": "How old are you?", "de": "Wie alt bist du?"},
       {"en": "Where are you from?", "de": "Woher kommst du?"},
-      {"en": "I'm from...", "de": "Ich komme aus..."}
+      {"en": "I'm from...", "de": "Ich komme aus..."},
+      {"en": "Can you help me?", "de": "Kannst du mir helfen?"},
+      {"en": "I need assistance", "de": "Ich brauche Hilfe"},
+      {"en": "How much is this?", "de": "Wie viel kostet das?"},
+      {"en": "Where is the bathroom?", "de": "Wo ist die Toilette?"},
+      {"en": "I am hungry", "de": "Ich habe Hunger"},
+      {"en": "I am thirsty", "de": "Ich habe Durst"},
+      {"en": "I am tired", "de": "Ich bin müde"},
+      {"en": "I like it", "de": "Es gefällt mir"},
+      {"en": "I don’t like it", "de": "Es gefällt mir nicht"},
+      {"en": "Can you repeat that?", "de": "Kannst du das wiederholen?"},
+      {"en": "What time is it?", "de": "Wie spät ist es?"},
+      {"en": "Where do you live?", "de": "Wo wohnst du?"},
+      {"en": "I live in...", "de": "Ich wohne in..."},
+      {"en": "Do you speak English?", "de": "Sprichst du Englisch?"},
+      {"en": "I speak a little German", "de": "Ich spreche ein bisschen Deutsch"},
+      {"en": "I don’t know", "de": "Ich weiß nicht"},
+      {"en": "Can I ask you something?", "de": "Kann ich dich etwas fragen?"},
+      {"en": "Wait a moment", "de": "Warte einen Moment"},
+      {"en": "I’m learning German", "de": "Ich lerne Deutsch"},
+      {"en": "That’s interesting", "de": "Das ist interessant"}
     ]
   }
 ]
