@@ -119,12 +119,12 @@ elif page == "Translator":
             with st.spinner("Translating..."):
                 out = translate_text(text_input, target)
                 st.success(out)
-
+# ---------- quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
-    # prefer quiz from session if opened from lesson page
     default_lesson = st.session_state.get("quiz_for", None)
     quiz_options = [q["lesson_id"] for q in quizzes]
+
     sel_id = st.selectbox(
         "Choose lesson quiz",
         [None] + quiz_options,
@@ -135,26 +135,23 @@ elif page == "Quiz":
         quiz = next(q for q in quizzes if q["lesson_id"] == sel_id)
         st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
 
-        with st.form("quiz_form"):
-            answers = {}
-            for i, q in enumerate(quiz["content"]):
-                if q["type"] == "mcq":
-                    answers[i] = st.radio(q["question"], q["options"], key=f"q{i}")
-                elif q["type"] == "fill":
-                    answers[i] = st.text_input(q["question"], key=f"q{i}")
-                elif q["type"] == "truefalse":
-                    answers[i] = st.selectbox(q["question"], ["True", "False"], key=f"q{i}")
-            submitted = st.form_submit_button("Submit Quiz")
+        # --- Initialize session state ---
+        if "q_index" not in st.session_state:
+            st.session_state.q_index = 0
+        if "answers" not in st.session_state:
+            st.session_state.answers = {}
+        if "quiz_finished" not in st.session_state:
+            st.session_state.quiz_finished = False
 
-        if submitted:
-            score = 0
-            total = len(quiz["content"])
+        total = len(quiz["content"])
 
+        # --- If quiz finished ---
+        if st.session_state.quiz_finished:
             st.write("### Results")
+            score = 0
             for i, q in enumerate(quiz["content"]):
-                user_a = str(answers.get(i, "")).strip().lower()
+                user_a = str(st.session_state.answers.get(i, "")).strip().lower()
                 correct_a = str(q["answer"]).strip().lower()
-
                 if q["type"] == "truefalse":
                     correct_a = "true" if q["answer"] else "false"
 
@@ -165,15 +162,43 @@ elif page == "Quiz":
                     st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
                     st.info(f"Correct answer: **{q['answer']}**")
 
-            # show final score
             st.write("---")
             st.success(f"Final Score: {score} / {total}")
 
-            # Mark lesson complete if passed >= 50%
             if score / total >= 0.5:
                 st.session_state.completed.add(sel_id)
                 st.info("Lesson marked complete because you passed the quiz ✅")
 
+            if st.button("Restart Quiz"):
+                st.session_state.q_index = 0
+                st.session_state.answers = {}
+                st.session_state.quiz_finished = False
+                st.experimental_rerun()
+
+        else:
+            # --- Show current question ---
+            i = st.session_state.q_index
+            q = quiz["content"][i]
+            st.write(f"**Question {i+1} of {total}:** {q['question']}")
+
+            # input field depending on type
+            if q["type"] == "mcq":
+                ans = st.radio("Choose an answer:", q["options"], key=f"q{i}")
+            elif q["type"] == "fill":
+                ans = st.text_input("Your answer:", key=f"q{i}")
+            elif q["type"] == "truefalse":
+                ans = st.selectbox("Choose:", ["True", "False"], key=f"q{i}")
+            else:
+                ans = ""
+
+            # --- Next / Finish button ---
+            if st.button("Next ➡️"):
+                st.session_state.answers[i] = ans
+                if i + 1 < total:
+                    st.session_state.q_index += 1
+                else:
+                    st.session_state.quiz_finished = True
+                st.experimental_rerun()
 
 # ---------- Chatbot ----------
 elif page == "Chatbot":
