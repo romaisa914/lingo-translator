@@ -122,76 +122,54 @@ elif page == "Translator":
 # ---------- quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
-    default_lesson = st.session_state.get("quiz_for", None)
-    quiz_options = [q["lesson_id"] for q in quizzes]
 
-    sel_id = st.selectbox(
-        "Choose lesson quiz",
-        [None] + quiz_options,
-        index=0 if default_lesson is None else quiz_options.index(default_lesson) + 1
-    )
+    # list of single-question quizzes
+    quiz_options = [sq["quiz_id"] for sq in single_quizzes]
+
+    sel_id = st.selectbox("Choose quiz", [None] + quiz_options)
 
     if sel_id:
-        quiz = next(q for q in quizzes if q["lesson_id"] == sel_id)
-        st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
+        quiz = next(sq for sq in single_quizzes if sq["quiz_id"] == sel_id)
+        qdata = quiz["content"][0]
 
-        # 👇 One form wrapping ALL questions
+        st.subheader(f"Quiz — Lesson {quiz['lesson_id']} — {sel_id}")
+
         with st.form("quiz_form"):
-            answers = {}
+            answer = None
 
-            for i, q in enumerate(quiz["content"]):
-                st.markdown(f"**Q{i+1}: {q['question']}**")
+            if qdata["type"] == "mcq":
+                answer = st.radio(
+                    "Choose your answer",
+                    qdata["options"],
+                    key=f"{sel_id}_mcq"
+                )
 
-                if q["type"] == "mcq":
-                    answers[i] = st.radio(
-                        f"Q{i+1}_mcq",   # 👈 UNIQUE key
-                        q["options"],
-                        key=f"q{i}_mcq"
-                    )
+            elif qdata["type"] == "fill":
+                answer = st.text_input("Your answer", key=f"{sel_id}_fill")
 
-                elif q["type"] == "fill":
-                    answers[i] = st.text_input(
-                        f"Q{i+1}_fill",  # 👈 UNIQUE key
-                        key=f"q{i}_fill"
-                    )
-
-                elif q["type"] == "truefalse":
-                    answers[i] = st.selectbox(
-                        f"Q{i+1}_tf",   # 👈 UNIQUE key
-                        ["True", "False"],
-                        key=f"q{i}_tf"
-                    )
-
-                st.write("---")
+            elif qdata["type"] == "truefalse":
+                answer = st.selectbox(
+                    "True or False?",
+                    ["True", "False"],
+                    key=f"{sel_id}_tf"
+                )
 
             submitted = st.form_submit_button("Submit Quiz")
 
         if submitted:
-            score = 0
-            total = len(quiz["content"])
-            st.write("### Results")
+            user_a = str(answer).strip().lower()
+            correct_a = str(qdata["answer"]).strip().lower()
 
-            for i, q in enumerate(quiz["content"]):
-                user_a = str(answers.get(i, "")).strip().lower()
-                correct_a = str(q["answer"]).strip().lower()
+            if qdata["type"] == "truefalse":
+                correct_a = "true" if qdata["answer"] else "false"
 
-                if q["type"] == "truefalse":
-                    correct_a = "true" if q["answer"] else "false"
+            if user_a == correct_a:
+                st.success(f"✅ Correct — {qdata['question']}")
+                st.session_state.completed.add(quiz["lesson_id"])
+            else:
+                st.error(f"❌ Wrong — {qdata['question']}")
+                st.info(f"Correct answer: **{qdata['answer']}**")
 
-                if user_a == correct_a:
-                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
-                    score += 1
-                else:
-                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
-                    st.info(f"Correct answer: **{q['answer']}**")
-
-            # final score
-            st.write("---")
-            st.success(f"Final Score: {score} / {total}")
-
-            if score / total >= 0.5:
-                st.session_state.completed.add(sel_id)
-                st.info("Lesson marked complete because you passed the quiz ✅")
 
 
 
