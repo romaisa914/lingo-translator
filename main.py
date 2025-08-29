@@ -136,29 +136,35 @@ elif page == "Quiz":
         st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
 
         # show all questions at once
-        with st.form("quiz_form"):
-            answers = {}
-            for i, q in enumerate(quiz["content"]):
-                st.markdown(f"**Q{i+1}: {q['question']}**")
-                if q["type"] == "mcq":
-                    answers[i] = st.radio(
-                        f"Q{i+1}",  # 🔑 unique label
-                        q["options"],
-                        key=f"q{i}"
-                    )
-                elif q["type"] == "fill":
-                    answers[i] = st.text_input(
-                        f"Q{i+1}",  # 🔑 unique label
-                        key=f"q{i}"
-                    )
-                elif q["type"] == "truefalse":
-                    answers[i] = st.selectbox(
-                        f"Q{i+1}",  # 🔑 unique label
-                        ["True", "False"],
-                        key=f"q{i}"
-                    )
-                st.write("---")
-            submitted = st.form_submit_button("Submit Quiz")
+       with st.form("quiz_form"):
+    answers = {}
+    for i, q in enumerate(quiz["content"]):
+        st.markdown(f"**Q{i+1}: {q['question']}**")
+
+        if q["type"] == "mcq":
+            answers[i] = st.radio(
+                f"Select an answer for Q{i+1}",  # 🔑 unique label
+                q["options"],
+                key=f"q{i}"
+            )
+
+        elif q["type"] == "fill":
+            answers[i] = st.text_input(
+                f"Your answer for Q{i+1}",  # 🔑 unique label
+                key=f"q{i}"
+            )
+
+        elif q["type"] == "truefalse":
+            answers[i] = st.selectbox(
+                f"Choose True/False for Q{i+1}",  # 🔑 unique label
+                ["True", "False"],
+                key=f"q{i}"
+            )
+
+        st.write("---")
+
+    submitted = st.form_submit_button("Submit Quiz")
+
 
         if submitted:
             score = 0
