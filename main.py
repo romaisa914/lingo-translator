@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import requests
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 # --- Paths ---
 DATA_DIR = Path(__file__).parent
@@ -36,6 +37,14 @@ if "quiz_for" not in st.session_state:
 
 # --- page config ---
 st.set_page_config(page_title="Lingo Translator", layout="wide")
+
+# --- Get query parameters ---
+def get_query_params():
+    query_params = st.experimental_get_query_params()
+    return {k: v[0] if v else None for k, v in query_params.items()}
+
+def set_query_params(**params):
+    st.experimental_set_query_params(**params)
 
 # --- local dictionary (fallback) ---
 LOCAL_DICT = {
@@ -100,10 +109,29 @@ def translate_text(text: str, target: str = "de"):
             return {"translated": "Translation not found in local dictionary.", "method": "local_dict"}
 
 # ---------- Navigation ----------
-page = st.sidebar.selectbox("Navigate", ["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"])
+# Get query parameters to determine which page to show
+query_params = get_query_params()
+default_page = query_params.get("page", "Home")
+
+# If a lesson was requested from the home page, navigate to Lessons
+if "lesson" in query_params:
+    default_page = "Lessons"
+elif "quiz" in query_params:
+    default_page = "Quiz"
+
+page = st.sidebar.selectbox("Navigate", ["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"], 
+                           index=["Home", "Lessons", "Translator", "Quiz", "Chatbot", "Progress", "Export"].index(default_page))
+
+# Update query params when page changes
+if page != default_page:
+    set_query_params(page=page)
 
 # ---------- Home ----------
 if page == "Home":
+    # Clear any lesson/quiz parameters when on home page
+    if "lesson" in query_params or "quiz" in query_params:
+        set_query_params(page="Home")
+    
     st.title("🇩🇪 Lingo Translator — Learn German")
     st.write("A lightweight learning app with lessons, translator, quizzes and a chatbot.")
     total = len(lessons)
@@ -119,15 +147,36 @@ if page == "Home":
             st.subheader(f"Lesson {l['lesson_id']}: {l['title']}")
             st.write(status)
             if st.button(f"Open lesson {l['lesson_id']}", key=f"open_{l['lesson_id']}"):
-                st.session_state.quiz_for = None
-                st.session_state._selected_lesson = l["lesson_id"]
+                set_query_params(page="Lessons", lesson=str(l["lesson_id"]))
+                st.experimental_rerun()
+            if st.button(f"Take quiz {l['lesson_id']}", key=f"quiz_{l['lesson_id']}"):
+                set_query_params(page="Quiz", quiz=str(l["lesson_id"]))
                 st.experimental_rerun()
 
 # ---------- Lessons ----------
 elif page == "Lessons":
     st.header("📚 Lessons")
+    
+    # Check if a lesson was specified in query params (from Home page)
+    lesson_id_from_params = query_params.get("lesson")
+    default_index = 0
+    
+    if lesson_id_from_params:
+        try:
+            lesson_id_from_params = int(lesson_id_from_params)
+            if lesson_id_from_params in lesson_map:
+                # Find the index of this lesson in the dropdown
+                lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
+                for i, choice in enumerate(lesson_choices):
+                    if choice.startswith(f"Lesson {lesson_id_from_params}:"):
+                        default_index = i + 1  # +1 because of the "-- choose --" option
+                        break
+        except ValueError:
+            pass
+    
     lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
-    sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
+    sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices, index=default_index)
+    
     if sel and sel != "-- choose --":
         lesson_id = int(sel.split()[1].strip(':'))
         lesson = lesson_map[lesson_id]
@@ -145,6 +194,7 @@ elif page == "Lessons":
             st.success("Lesson marked complete ✅")
         if st.button("Open lesson quiz"):
             st.session_state.quiz_for = lesson_id
+            set_query_params(page="Quiz", quiz=str(lesson_id))
             st.experimental_rerun()
 
 # ---------- Translator ----------
@@ -168,9 +218,29 @@ elif page == "Translator":
 # ---------- Quiz ----------
 elif page == "Quiz":
     st.header("🧪 Quiz")
+    
+    # Check if a quiz was specified in query params (from Home page)
+    quiz_id_from_params = query_params.get("quiz")
     default_lesson = st.session_state.get("quiz_for", None)
+    
+    if quiz_id_from_params:
+        try:
+            quiz_id_from_params = int(quiz_id_from_params)
+            if quiz_id_from_params in quiz_map:
+                default_lesson = quiz_id_from_params
+                st.session_state.quiz_for = quiz_id_from_params
+        except ValueError:
+            pass
+    
     quiz_options = [q["lesson_id"] for q in quizzes]
-    sel_id = st.selectbox("Choose lesson quiz", [None] + quiz_options, index=0 if default_lesson is None else quiz_options.index(default_lesson)+1)
+    
+    # Find the index of the default lesson in the dropdown
+    default_index = 0
+    if default_lesson is not None and default_lesson in quiz_options:
+        default_index = quiz_options.index(default_lesson) + 1  # +1 because of the None option
+    
+    sel_id = st.selectbox("Choose lesson quiz", [None] + quiz_options, index=default_index)
+    
     if sel_id:
         quiz = quiz_map.get(sel_id)
         lesson_title = lesson_map[sel_id]["title"] if sel_id in lesson_map else ""
