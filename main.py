@@ -285,52 +285,60 @@ elif page == "Quiz":
 
 
 # ---------- Chatbot ----------
-elif page == "Chatbot":
-    import requests
-    import streamlit as st
+# ---------- Chatbot ----------
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+import streamlit as st
 
-    st.header("🤖 German Chatbot")
-    st.write("Chat with a free German AI assistant!")
+# Load model and tokenizer once
+@st.cache_resource
+def load_german_model():
+    tokenizer = AutoTokenizer.from_pretrained("dbmdz/german-gpt2")
+    model = AutoModelForCausalLM.from_pretrained("dbmdz/german-gpt2")
+    return tokenizer, model
 
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+tokenizer, model = load_german_model()
 
-    def send_message_to_openassistant(message: str):
-        url = "https://api.openassistantgpt.io/v1/chat/completions"
-        headers = {"Content-Type": "application/json"}
-        data = {
-            "messages": [{"role": "user", "content": message}],
-            "model": "gpt-3.5-turbo",
-            "language": "de"
-        }
-        try:
-            response = requests.post(url, json=data, headers=headers, timeout=10)
-            response.raise_for_status()
-            result = response.json()
-            if "choices" in result and len(result["choices"]) > 0:
-                return result["choices"][0].get("message", {}).get("content") or "No response from bot."
-            elif "text" in result:
-                return result["text"]
-            else:
-                return str(result)
-        except Exception as e:
-            return f"Error contacting chatbot API: {e}"
+# Initialize chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-    # ---- Use a form for input ----
-    with st.form(key="chat_form", clear_on_submit=True):
-        user_input = st.text_input("You:")
-        submit = st.form_submit_button("Send")
-        if submit and user_input.strip():
-            st.session_state.chat_history.append(("You", user_input))
-            bot_reply = send_message_to_openassistant(user_input)
-            st.session_state.chat_history.append(("Bot", bot_reply))
+# Chat generation function
+def chat_german(prompt, chat_history=None, max_length=100):
+    if chat_history:
+        prompt = " ".join(chat_history) + " " + prompt
 
-    # Display chat history
-    for sender, message in st.session_state.chat_history:
-        if sender == "You":
-            st.markdown(f"**You:** {message}")
-        else:
-            st.markdown(f"**Bot:** {message}")
+    inputs = tokenizer.encode(prompt, return_tensors="pt")
+    outputs = model.generate(
+        inputs,
+        max_length=max_length,
+        pad_token_id=tokenizer.eos_token_id,
+        do_sample=True,
+        top_k=50,
+        top_p=0.95,
+        temperature=0.7
+    )
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Remove the prompt part from response
+    response = response[len(prompt):].strip()
+    return response if response else "Ich weiß nicht, was ich antworten soll."
+
+# Streamlit interface
+st.header("🤖 German Chatbot")
+user_input = st.text_input("You:", key="chat_input")
+
+if st.button("Send") and user_input.strip():
+    st.session_state.chat_history.append(user_input)
+    bot_reply = chat_german(user_input, st.session_state.chat_history)
+    st.session_state.chat_history.append(bot_reply)
+    st.experimental_rerun()
+
+# Display chat history
+for i, msg in enumerate(st.session_state.chat_history):
+    if i % 2 == 0:
+        st.markdown(f"**You:** {msg}")
+    else:
+        st.markdown(f"**Bot:** {msg}")
 
 
 
