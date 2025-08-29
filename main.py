@@ -285,36 +285,48 @@ elif page == "Quiz":
 
 
 # ---------- Chatbot ----------
-elif page == "Chatbot":
-    st.header("🤖 German Chatbot")
-    st.write("Simple rule-based chatbot — type in German (e.g., 'hallo', 'danke', 'hilfe').")
-    col1, col2 = st.columns([3,1])
-    with col1:
-        user_msg = st.text_input("You:", key="chat_input")
-    with col2:
-        if st.button("Send"):
-            if user_msg.strip():
-                # simple reply logic
-                msg = user_msg.lower()
-                if "hallo" in msg:
-                    reply = "Hallo! Wie geht's?"
-                elif "danke" in msg:
-                    reply = "Gern geschehen!"
-                elif "tschau" in msg or "bye" in msg:
-                    reply = "Auf Wiedersehen!"
-                elif "hilfe" in msg:
-                    reply = "Ich kann dir bei Deutschübungen helfen!"
-                else:
-                    reply = "Ich verstehe nicht. Bitte versuche es noch einmal."
-                st.session_state.chat_history.append(("You", user_msg))
-                st.session_state.chat_history.append(("Bot", reply))
-                st.experimental_rerun()
-    # show chat history
-    for who, text in st.session_state.chat_history:
-        if who == "You":
-            st.markdown(f"**You:** {text}")
-        else:
-            st.markdown(f"**Bot:** {text}")
+import streamlit as st
+import requests
+
+st.header("🤖 German Chatbot")
+st.write("Chat with an AI assistant in German!")
+
+# Initialize session state for chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+# Display chat history
+for user_message, bot_response in st.session_state.chat_history:
+    st.markdown(f"**You:** {user_message}")
+    st.markdown(f"**Bot:** {bot_response}")
+
+# User input
+user_input = st.text_input("You:", key="user_input")
+
+if user_input:
+    # Append user message to chat history
+    st.session_state.chat_history.append(("You", user_input))
+
+    # Send request to OpenAssistant API
+    url = "https://api.openassistant.io/v1/chat"
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "messages": [{"role": "user", "content": user_input}],
+        "language": "de-DE"  # Specify German language
+    }
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        bot_message = response.json().get("message", "Sorry, I didn't understand that.")
+    else:
+        bot_message = "Error: Unable to get response from chatbot."
+
+    # Append bot response to chat history
+    st.session_state.chat_history.append(("Bot", bot_message))
+
+    # Clear input field
+    st.text_input("You:", "", key="user_input")
+
 
 # ---------- Progress page ----------
 # ---------- Progress page ----------
