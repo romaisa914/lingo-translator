@@ -103,11 +103,15 @@ elif page == "Lessons":
         st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
         st.write("Practice these words/phrases:")
 
-        # ✅ Show full lesson content in a clean table
         import pandas as pd
         df = pd.DataFrame(lesson["content"])
         df = df.rename(columns={"en": "English", "de": "German"})
-        st.table(df)
+
+        # 🔍 Debug: show how many rows we really got
+        st.write(f"Loaded {len(df)} phrases")
+
+        # ✅ Use dataframe with fixed height (scrollable if >10 rows)
+        st.dataframe(df, height=400)
 
         # Buttons
         if st.button("Mark lesson complete"):
