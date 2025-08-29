@@ -296,16 +296,32 @@ elif page == "Chatbot":
             st.markdown(f"**Bot:** {text}")
 
 # ---------- Progress page ----------
+
 elif page == "Progress":
-    st.header("📈 Progress")
-    total = len(lessons)
+    st.header("📈 Your Progress")
+
+    total = len(lessons)  # now 10 lessons
     completed = len(st.session_state.completed)
     pct = int((completed / total) * 100) if total else 0
-    st.write(f"Lessons completed: **{completed} / {total}** ({pct}%)")
+
+    # Show overall progress
+    st.metric("Lessons completed", f"{completed}/{total}", delta=f"{pct}%")
     st.progress(pct)
+
+    st.markdown("---")
+    st.subheader("Lesson Status")
+
+    # Show each lesson and its status
+    for l in lessons:
+        status = "✅ Completed" if l["lesson_id"] in st.session_state.completed else "◻️ Not started"
+        st.write(f"**Lesson {l['lesson_id']}** — {l['title']} — *{status}*")
+
+    st.markdown("---")
+    # Reset progress button
     if st.button("Reset progress"):
         st.session_state.completed = set()
-        st.success("Progress reset.")
+        st.success("All lesson progress has been reset.")
+
 
 # ---------- Export progress ----------
 elif page == "Export":
