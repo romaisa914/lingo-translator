@@ -174,17 +174,44 @@ elif page == "Lessons":
 
 # ---------- Translator ----------
 elif page == "Translator":
+    import requests
     st.header("🔁 Translator")
-    text_input = st.text_input("Enter text to translate")
-    lang = st.selectbox("Direction", ["English → German", "German → English"])
+
+    # Input text (remember previous input)
+    text_input = st.text_input("Enter text to translate", key="translator_input")
+
+    # Direction
+    lang = st.selectbox("Direction", ["English → German", "German → English"], key="translator_dir")
     target = "de" if lang.startswith("English") else "en"
-    if st.button("Translate"):
-        if not text_input.strip():
-            st.warning("Type something to translate.")
-        else:
-            with st.spinner("Translating..."):
-                out = translate_text(text_input, target)
-                st.success(out)
+
+    # Translation function using MyMemory API
+    def translate_text(text: str, target: str = "de") -> str:
+        text = text.strip()
+        if not text:
+            return ""
+        try:
+            resp = requests.get(
+                "https://api.mymemory.translated.net/get",
+                params={"q": text, "langpair": f"en|de" if target=="de" else f"de|en"},
+                timeout=8
+            )
+            data = resp.json()
+            translated = data.get("responseData", {}).get("translatedText")
+            if translated:
+                return translated
+        except Exception:
+            pass
+        return "Translation failed."
+
+    # Translate automatically as user types
+    if text_input.strip():
+        with st.spinner("Translating..."):
+            translated_text = translate_text(text_input, target)
+            st.subheader("Translation:")
+            st.success(translated_text)
+    else:
+        st.info("Type text above to see translation.")
+
 
 # ---------- Quiz page ----------
 elif page == "Quiz":
