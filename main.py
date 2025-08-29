@@ -296,38 +296,47 @@ elif page == "Chatbot":
             st.markdown(f"**Bot:** {text}")
 
 # ---------- Progress page ----------
-
 # ---------- Progress page ----------
 elif page == "Progress":
+    import json
+    import streamlit as st
+    from pathlib import Path
+
+    DATA_DIR = Path(__file__).parent
+    LESSONS_FILE = DATA_DIR / "lessons.json"
+
+    # Load lessons directly
+    with open(LESSONS_FILE, "r", encoding="utf-8") as f:
+        lessons = json.load(f)
+
     st.header("📈 Your Progress")
 
     total = len(lessons)  # now 10 lessons
     completed = len(st.session_state.completed)
     pct = int((completed / total) * 100) if total else 0
 
-    # Show overall progress
     st.metric("Lessons completed", f"{completed}/{total}", delta=f"{pct}%")
     st.progress(pct)
 
     st.markdown("---")
     st.subheader("Lesson Status")
 
-    # Display each lesson with its completion status
+    # Show each lesson and its status
     for l in lessons:
         status = "✅ Completed" if l["lesson_id"] in st.session_state.completed else "◻️ Not started"
         st.write(f"**Lesson {l['lesson_id']}: {l['title']}** — *{status}*")
 
     st.markdown("---")
-    
     # Reset progress button
     if st.button("Reset progress"):
         st.session_state.completed = set()
         st.success("All lesson progress has been reset.")
-    
-    # Optional: Mark all lessons complete for testing
+
+    # Mark all lessons complete button
     if st.button("Mark all lessons as completed"):
         st.session_state.completed = {l["lesson_id"] for l in lessons}
         st.success("All lessons marked as completed ✅")
+
 
 
 # ---------- Export progress ----------
