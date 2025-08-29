@@ -135,62 +135,63 @@ elif page == "Quiz":
         quiz = next(q for q in quizzes if q["lesson_id"] == sel_id)
         st.subheader(f"Quiz — Lesson {sel_id} : {lesson_map[sel_id]['title']}")
 
-        # show all questions at once
-        with st.form("quiz_form"):   # ✅ FIXED INDENTATION
+        # 👇 One form wrapping ALL questions
+        with st.form("quiz_form"):
             answers = {}
+
             for i, q in enumerate(quiz["content"]):
                 st.markdown(f"**Q{i+1}: {q['question']}**")
 
                 if q["type"] == "mcq":
                     answers[i] = st.radio(
-                        f"Select an answer for Q{i+1}",
+                        f"Q{i+1}_mcq",   # 👈 UNIQUE key
                         q["options"],
-                        key=f"q{i}"
+                        key=f"q{i}_mcq"
                     )
 
                 elif q["type"] == "fill":
                     answers[i] = st.text_input(
-                        f"Your answer for Q{i+1}",
-                        key=f"q{i}"
+                        f"Q{i+1}_fill",  # 👈 UNIQUE key
+                        key=f"q{i}_fill"
                     )
 
                 elif q["type"] == "truefalse":
                     answers[i] = st.selectbox(
-                        f"Choose True/False for Q{i+1}",
+                        f"Q{i+1}_tf",   # 👈 UNIQUE key
                         ["True", "False"],
-                        key=f"q{i}"
+                        key=f"q{i}_tf"
                     )
 
                 st.write("---")
 
             submitted = st.form_submit_button("Submit Quiz")
 
-            if submitted:
-                score = 0
-                total = len(quiz["content"])
-                st.write("### Results")
+        if submitted:
+            score = 0
+            total = len(quiz["content"])
+            st.write("### Results")
 
-                for i, q in enumerate(quiz["content"]):
-                    user_a = str(answers.get(i, "")).strip().lower()
-                    correct_a = str(q["answer"]).strip().lower()
+            for i, q in enumerate(quiz["content"]):
+                user_a = str(answers.get(i, "")).strip().lower()
+                correct_a = str(q["answer"]).strip().lower()
 
-                    if q["type"] == "truefalse":
-                        correct_a = "true" if q["answer"] else "false"
+                if q["type"] == "truefalse":
+                    correct_a = "true" if q["answer"] else "false"
 
-                    if user_a == correct_a:
-                        st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
-                        score += 1
-                    else:
-                        st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
-                        st.info(f"Correct answer: **{q['answer']}**")
+                if user_a == correct_a:
+                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
+                    score += 1
+                else:
+                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
+                    st.info(f"Correct answer: **{q['answer']}**")
 
-                # show final score
-                st.write("---")
-                st.success(f"Final Score: {score} / {total}")
+            # final score
+            st.write("---")
+            st.success(f"Final Score: {score} / {total}")
 
-                if score / total >= 0.5:
-                    st.session_state.completed.add(sel_id)
-                    st.info("Lesson marked complete because you passed the quiz ✅")
+            if score / total >= 0.5:
+                st.session_state.completed.add(sel_id)
+                st.info("Lesson marked complete because you passed the quiz ✅")
 
 
 
