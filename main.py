@@ -119,7 +119,74 @@ elif page == "Translator":
             with st.spinner("Translating..."):
                 out = translate_text(text_input, target)
                 st.success(out)
-# ---------- quiz ----------
+elif page == "Quiz":
+    st.header("🧪 Quiz")
+    default_lesson = st.session_state.get("quiz_for", None)
+
+    # build options from quizzes.json (all 20)
+    quiz_options = [q["quiz_id"] for q in quizzes]
+
+    sel_id = st.selectbox(
+        "Choose a quiz",
+        [None] + quiz_options,
+        index=0 if default_lesson is None else quiz_options.index(default_lesson) + 1
+    )
+
+    if sel_id:
+        quiz = next(q for q in quizzes if q["quiz_id"] == sel_id)
+        st.subheader(f"{quiz['quiz_id']} — {quiz['title']}")
+
+        # 👇 one form per quiz
+        with st.form("quiz_form"):
+            answers = {}
+            for i, q in enumerate(quiz["content"]):
+                st.markdown(f"**Q{i+1}: {q['question']}**")
+
+                if q["type"] == "mcq":
+                    answers[i] = st.radio(
+                        f"Q{i+1}_mcq", q["options"], key=f"q{i}_mcq"
+                    )
+
+                elif q["type"] == "fill":
+                    answers[i] = st.text_input(
+                        f"Q{i+1}_fill", key=f"q{i}_fill"
+                    )
+
+                elif q["type"] == "truefalse":
+                    answers[i] = st.selectbox(
+                        f"Q{i+1}_tf", ["True", "False"], key=f"q{i}_tf"
+                    )
+
+                st.write("---")
+
+            submitted = st.form_submit_button("Submit Quiz")
+
+        if submitted:
+            score = 0
+            total = len(quiz["content"])
+            st.write("### Results")
+
+            for i, q in enumerate(quiz["content"]):
+                user_a = str(answers.get(i, "")).strip().lower()
+                correct_a = str(q["answer"]).strip().lower()
+
+                if q["type"] == "truefalse":
+                    correct_a = "true" if q["answer"] else "false"
+
+                if user_a == correct_a:
+                    st.success(f"Q{i+1}: ✅ Correct — {q['question']}")
+                    score += 1
+                else:
+                    st.error(f"Q{i+1}: ❌ Wrong — {q['question']}")
+                    st.info(f"Correct answer: **{q['answer']}**")
+
+            st.write("---")
+            st.success(f"Final Score: {score} / {total}")
+
+            if score / total >= 0.5:
+                st.session_state.completed.add(sel_id)
+                st.info("Lesson marked complete because you passed the quiz ✅")
+
 # --- QUIZ SECTION ---
 import json
 
