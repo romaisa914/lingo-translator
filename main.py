@@ -90,30 +90,21 @@ if page == "Home":
 # ---------- Lessons page ----------
 elif page == "Lessons":
     st.header("📚 Lessons")
-
-    # Dropdown to select lesson
     lesson_choices = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
     sel = st.selectbox("Select a lesson", ["-- choose --"] + lesson_choices)
 
     if sel and sel != "-- choose --":
-        # Extract lesson_id
         lesson_id = int(sel.split()[1].strip(':'))
         lesson = lesson_map[lesson_id]
 
         st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
         st.write("Practice these words/phrases:")
 
-        import pandas as pd
-        df = pd.DataFrame(lesson["content"])
-        df = df.rename(columns={"en": "English", "de": "German"})
+        # ✅ Use markdown instead of write to show ALL 30
+        for item in lesson["content"]:
+            st.markdown(f"- **{item['en']}** → *{item['de']}*")
 
-        # 🔍 Debug: show how many rows we really got
-        st.write(f"Loaded {len(df)} phrases")
-
-        # ✅ Use dataframe with fixed height (scrollable if >10 rows)
-        st.dataframe(df, height=400)
-
-        # Buttons
+        st.write("")
         if st.button("Mark lesson complete"):
             st.session_state.completed.add(lesson_id)
             st.success("Lesson marked complete ✅")
@@ -121,6 +112,7 @@ elif page == "Lessons":
         if st.button("Open lesson quiz"):
             st.session_state.quiz_for = lesson_id
             st.experimental_rerun()
+
 
 
 
