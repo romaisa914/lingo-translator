@@ -87,6 +87,7 @@ if page == "Home":
     st.info("Tip: Go to the Lessons tab to open a lesson. Mark it complete after practicing.")
 
 # ---------- Lessons page ----------
+elif page == "Lessons":
 import json
 import streamlit as st
 
@@ -97,26 +98,7 @@ with open("lessons.json", "r", encoding="utf-8") as f:
 # Map lesson_id → lesson for quick lookup
 lesson_map = {l["lesson_id"]: l for l in lessons}
 
-# ================== SESSION STATE ==================
-if "completed" not in st.session_state:
-    st.session_state.completed = set()
-if "quiz_for" not in st.session_state:
-    st.session_state.quiz_for = None
-if "_selected_lesson" not in st.session_state:
-    st.session_state._selected_lesson = None
-
-# ================== SIDEBAR ==================
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Lessons", "Quiz"])
-
-# ================== HOME ==================
-if page == "Home":
-    st.title("🎓 German Learning App")
-    st.write("Welcome! Choose **Lessons** to start learning or **Quiz** to test yourself.")
-
-# ================== LESSONS ==================
-elif page == "Lessons":
-    st.header("📚 Lessons")
+  st.header("📚 Lessons")
 
     # Build lesson labels
     lesson_labels = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
@@ -134,6 +116,16 @@ elif page == "Lessons":
             default_index = 0
         finally:
             st.session_state._selected_lesson = None
+
+# ================== SESSION STATE ==================
+if "completed" not in st.session_state:
+    st.session_state.completed = set()
+if "quiz_for" not in st.session_state:
+    st.session_state.quiz_for = None
+if "_selected_lesson" not in st.session_state:
+    st.session_state._selected_lesson = None
+
+
 
     # ---- Single lesson dropdown ----
     sel = st.selectbox(
@@ -180,13 +172,6 @@ elif page == "Lessons":
                 st.success("Quiz selected — open the Quiz tab.")
                 st.experimental_rerun()
 
-# ================== QUIZ (placeholder) ==================
-elif page == "Quiz":
-    st.header("📝 Quiz")
-    if st.session_state.quiz_for:
-        st.write(f"Quiz for Lesson {st.session_state.quiz_for} will go here.")
-    else:
-        st.info("Select a lesson and open its quiz first.")
 
 
 
