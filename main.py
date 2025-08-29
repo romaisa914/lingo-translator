@@ -92,7 +92,7 @@ import streamlit as st
 
 # ================== LOAD LESSONS ==================
 with open("lessons.json", "r", encoding="utf-8") as f:
-    lessons = json.load(f)   # ✅ load ALL lessons (no slicing)
+    lessons = json.load(f)   # ✅ load ALL lessons
 
 # Map lesson_id → lesson for quick lookup
 lesson_map = {l["lesson_id"]: l for l in lessons}
@@ -102,92 +102,37 @@ if "completed" not in st.session_state:
     st.session_state.completed = set()
 if "quiz_for" not in st.session_state:
     st.session_state.quiz_for = None
-if "_selected_lesson" not in st.session_state:
-    st.session_state._selected_lesson = None
 
-# ================== SIDEBAR ==================
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Lessons", "Quiz"])
+# ================== HEADER ==================
+st.title("🎓 German Learning App")
+st.write("Welcome! Start learning lessons and test yourself with quizzes.")
 
-# ================== HOME ==================
-if page == "Home":
-    st.title("🎓 German Learning App")
-    st.write("Welcome! Choose **Lessons** to start learning or **Quiz** to test yourself.")
+st.markdown("---")
 
-# ================== LESSONS ==================
-elif page == "Lessons":
-    st.header("📚 Lessons")
-
-    # Build lesson labels
-    lesson_labels = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
-    label_to_id = {label: l["lesson_id"] for label, l in zip(lesson_labels, lessons)}
-
-    # Handle preselection (from Home if needed)
-    default_index = 0
-    preselected = st.session_state.get("_selected_lesson")
-    if preselected is not None:
-        try:
-            target_label = next(lbl for lbl in lesson_labels
-                                if label_to_id[lbl] == preselected)
-            default_index = lesson_labels.index(target_label) + 1
-        except StopIteration:
-            default_index = 0
-        finally:
-            st.session_state._selected_lesson = None
-
-    # ---- Single lesson dropdown ----
-    sel = st.selectbox(
-        "Select a lesson",
-        ["-- choose --"] + lesson_labels,
-        index=default_index
-    )
-
-    if sel and sel != "-- choose --":
-        lesson_id = label_to_id[sel]
-        lesson = lesson_map[lesson_id]
-
-        st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
-        st.caption("Practice these words/phrases:")
-
-        # ✅ Show ALL items in lesson (no slicing)
-        for idx, item in enumerate(lesson.get("content", []), start=1):
+# ================== ALL LESSONS (expanders) ==================
+st.subheader("📚 Lessons")
+for l in lessons:
+    with st.expander(f"Lesson {l['lesson_id']}: {l['title']}"):
+        for idx, item in enumerate(l.get("content", []), start=1):
             st.write(f"{idx}. **{item['en']}** → *{item['de']}*")
 
         col1, col2 = st.columns(2)
-        if col1.button("Mark lesson complete", key=f"complete_{lesson_id}"):
-            st.session_state.completed.add(lesson_id)
-            st.success("Lesson marked complete ✅")
-        if col2.button("Open lesson quiz", key=f"open_quiz_{lesson_id}"):
-            st.session_state.quiz_for = lesson_id
-            st.success("Quiz selected — open the Quiz tab.")
+        if col1.button("Mark complete", key=f"exp_complete_{l['lesson_id']}"):
+            st.session_state.completed.add(l["lesson_id"])
+            st.success("Marked complete ✅")
+        if col2.button("Open quiz", key=f"exp_open_quiz_{l['lesson_id']}"):
+            st.session_state.quiz_for = l["lesson_id"]
+            st.success("Quiz selected — scroll down to Quiz section.")
             st.experimental_rerun()
 
-    st.markdown("---")
+st.markdown("---")
 
-    # ---- All lessons (expanders) ----
-    st.subheader("All lessons")
-    for l in lessons:
-        with st.expander(f"Lesson {l['lesson_id']}: {l['title']}"):
-            for idx, item in enumerate(l.get("content", []), start=1):
-                st.write(f"{idx}. **{item['en']}** → *{item['de']}*")
-
-            c1, c2 = st.columns(2)
-            if c1.button("Mark complete", key=f"exp_complete_{l['lesson_id']}"):
-                st.session_state.completed.add(l["lesson_id"])
-                st.success("Marked complete ✅")
-            if c2.button("Open quiz", key=f"exp_open_quiz_{l['lesson_id']}"):
-                st.session_state.quiz_for = l["lesson_id"]
-                st.success("Quiz selected — open the Quiz tab.")
-                st.experimental_rerun()
-
-# ================== QUIZ (placeholder) ==================
-elif page == "Quiz":
-    st.header("📝 Quiz")
-    if st.session_state.quiz_for:
-        st.write(f"Quiz for Lesson {st.session_state.quiz_for} will go here.")
-    else:
-        st.info("Select a lesson and open its quiz first.")
-
+# ================== QUIZ ==================
+st.header("📝 Quiz")
+if st.session_state.quiz_for:
+    st.write(f"Quiz for Lesson {st.session_state.quiz_for} will go here.")
+else:
+    st.info("Select a lesson and open its quiz first.")
 
 
 
