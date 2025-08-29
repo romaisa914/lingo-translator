@@ -203,14 +203,20 @@ elif page == "Translator":
             pass
         return "Translation failed."
 
-    # Translate automatically as user types
-    if text_input.strip():
-        with st.spinner("Translating..."):
-            translated_text = translate_text(text_input, target)
-            st.subheader("Translation:")
-            st.success(translated_text)
-    else:
-        st.info("Type text above to see translation.")
+    # Button to trigger translation
+    if st.button("Translate"):
+        if not text_input.strip():
+            st.warning("Type something to translate.")
+        else:
+            with st.spinner("Translating..."):
+                translated_text = translate_text(text_input, target)
+                # Store in session_state so result persists after rerun
+                st.session_state.translated_text = translated_text
+
+    # Show translation if available
+    if "translated_text" in st.session_state:
+        st.subheader("Translation:")
+        st.success(st.session_state.translated_text)
 
 
 # ---------- Quiz page ----------
