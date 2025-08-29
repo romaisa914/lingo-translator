@@ -71,20 +71,41 @@ def translate_text(text: str, target: str = "de") -> str:
         return rev.get(text.lower(), "Translation not found in local dictionary")
 
 # ---------- Pages ----------
+# ---------- Home page ----------
 if page == "Home":
+    import json
+    import streamlit as st
+    from pathlib import Path
+
+    DATA_DIR = Path(__file__).parent
+    LESSONS_FILE = DATA_DIR / "lessons.json"
+
+    # Load lessons directly
+    with open(LESSONS_FILE, "r", encoding="utf-8") as f:
+        lessons = json.load(f)
+
+    # Initialize completed set if not present
+    if "completed" not in st.session_state:
+        st.session_state.completed = set()
+
     st.title("🇩🇪 Lingo Translator — Learn German")
     st.write("A lightweight learning app with lessons, translator, quizzes and a chatbot.")
+
+    # Progress
     total = len(lessons)
     completed = len(st.session_state.completed)
     pct = int((completed / total) * 100) if total else 0
     st.metric("Progress", f"{completed}/{total}", delta=f"{pct}%")
     st.progress(pct)
+
     st.write("**Available lessons**")
     for l in lessons:
         status = "✅ Completed" if l["lesson_id"] in st.session_state.completed else "◻️ Not started"
-        st.write(f"**Lesson {l['lesson_id']}** — {l['title']} — *{status}*")
+        st.write(f"**Lesson {l['lesson_id']} — {l['title']}** — *{status}*")
+
     st.write("---")
     st.info("Tip: Go to the Lessons tab to open a lesson. Mark it complete after practicing.")
+
 
 # ---------- Lessons page ----------
 elif page == "Lessons":
