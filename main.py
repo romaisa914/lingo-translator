@@ -525,9 +525,10 @@ elif page == "Export":
     st.write("Download your learning progress to backup or transfer it to another device.")
     
     # Create progress data with additional metadata
+    import datetime
     progress = {
         "version": "1.0",
-        "export_date": st.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "export_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "total_lessons": len(lessons),
         "completed_lessons": len(st.session_state.completed),
         "completed": list(st.session_state.completed)
@@ -537,7 +538,7 @@ elif page == "Export":
     st.download_button(
         "📥 Download Progress (JSON)", 
         json.dumps(progress, indent=2, ensure_ascii=False), 
-        file_name=f"german_learning_progress_{st.datetime.now().strftime('%Y%m%d_%H%M%S')}.json", 
+        file_name=f"german_learning_progress_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json", 
         mime="application/json",
         help="Download your complete learning progress as a JSON file"
     )
@@ -591,14 +592,15 @@ elif page == "Export":
                 st.error("❌ Invalid progress file: 'completed' should be a list.")
             else:
                 # Validate each lesson ID exists
+                valid_lesson_ids = [l["lesson_id"] for l in lessons]
                 invalid_lessons = [lesson_id for lesson_id in data["completed"] 
-                                  if lesson_id not in [l["lesson_id"] for l in lessons]]
+                                  if lesson_id not in valid_lesson_ids]
                 
                 if invalid_lessons:
                     st.warning(f"⚠️ File contains invalid lesson IDs: {invalid_lessons}. These will be ignored.")
                     # Only keep valid lesson IDs
                     valid_lessons = [lesson_id for lesson_id in data["completed"] 
-                                    if lesson_id in [l["lesson_id"] for l in lessons]]
+                                    if lesson_id in valid_lesson_ids]
                     st.session_state.completed = set(valid_lessons)
                 else:
                     st.session_state.completed = set(data["completed"])
