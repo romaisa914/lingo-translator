@@ -122,75 +122,6 @@ elif page == "Lessons":
     # ================== SESSION STATE ==================
     if "completed" not in st.session_state:
         st.session_state.completed = set()
-    if "quiz_for" not in st.session_state:
-        st.session_state.quiz_for = None
-    if "_selected_lesson" not in st.session_state:
-        st.session_state._selected_lesson = None
-
-    # ================== LESSONS PAGE ==================
-    st.header("📚 Lessons")
-
-    # Build lesson labels
-    lesson_labels = [f"Lesson {l['lesson_id']}: {l['title']}" for l in lessons]
-    label_to_id = {label: l["lesson_id"] for label, l in zip(lesson_labels, lessons)}
-
-    # Handle preselection (from Home if needed)
-    default_index = 0
-    preselected = st.session_state.get("_selected_lesson")
-    if preselected is not None:
-        try:
-            target_label = next(lbl for lbl in lesson_labels if label_to_id[lbl] == preselected)
-            default_index = lesson_labels.index(target_label) + 1
-        except StopIteration:
-            default_index = 0
-        finally:
-            st.session_state._selected_lesson = None
-
-    # ---- Single lesson dropdown ----
-    sel = st.selectbox(
-        "Select a lesson",
-        ["-- choose --"] + lesson_labels,
-        index=default_index
-    )
-
-    if sel and sel != "-- choose --":
-        lesson_id = label_to_id[sel]
-        lesson = lesson_map[lesson_id]
-
-        st.subheader(f"Lesson {lesson_id} — {lesson['title']}")
-        st.caption("Practice these words/phrases:")
-
-        # ✅ Show ALL items in lesson (no slicing)
-        for idx, item in enumerate(lesson.get("content", []), start=1):
-            st.write(f"{idx}. **{item['en']}** → *{item['de']}*")
-
-        col1, col2 = st.columns(2)
-        if col1.button("Mark lesson complete", key=f"complete_{lesson_id}"):
-            st.session_state.completed.add(lesson_id)
-            st.success("Lesson marked complete ✅")
-        if col2.button("Open lesson quiz", key=f"open_quiz_{lesson_id}"):
-            st.session_state.quiz_for = lesson_id
-            st.success("Quiz selected — open the Quiz tab.")
-            st.experimental_rerun()
-
-    st.markdown("---")
-# ---------- Lessons page ----------
-elif page == "Lessons":
-    import json
-    import streamlit as st
-
-    # ================== LOAD LESSONS ==================
-    with open("lessons.json", "r", encoding="utf-8") as f:
-        lessons = json.load(f)   # ✅ load ALL lessons (no slicing)
-
-    # Map lesson_id → lesson for quick lookup
-    lesson_map = {l["lesson_id"]: l for l in lessons}
-
-    # ================== SESSION STATE ==================
-    if "completed" not in st.session_state:
-        st.session_state.completed = set()
-    if "quiz_for" not in st.session_state:
-        st.session_state.quiz_for = None
     if "_selected_lesson" not in st.session_state:
         st.session_state._selected_lesson = None
 
@@ -248,6 +179,7 @@ elif page == "Lessons":
             if st.button("Mark complete", key=f"exp_complete_{l['lesson_id']}"):
                 st.session_state.completed.add(l["lesson_id"])
                 st.success("Marked complete ✅")
+                st.rerun()
 
 # ---------- Translator ----------
 elif page == "Translator":
