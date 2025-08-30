@@ -516,16 +516,130 @@ elif page == "Progress":
 
 
 
-# ---------- Export progress ----------
+# ---------- Export / Import Progress ----------
 elif page == "Export":
     st.header("📤 Export / Import Progress")
-    # Download completed list as JSON
-    progress = {"completed": list(st.session_state.completed)}
-    st.download_button("Download progress (JSON)", json.dumps(progress), file_name="progress.json", mime="application/json")
+    
+    # Export section
+    st.subheader("Export Your Progress")
+    st.write("Download your learning progress to backup or transfer it to another device.")
+    
+    # Create progress data with additional metadata
+    progress = {
+        "version": "1.0",
+        "export_date": st.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "total_lessons": len(lessons),
+        "completed_lessons": len(st.session_state.completed),
+        "completed": list(st.session_state.completed)
+    }
+    
+    # Download button
+    st.download_button(
+        "📥 Download Progress (JSON)", 
+        json.dumps(progress, indent=2, ensure_ascii=False), 
+        file_name=f"german_learning_progress_{st.datetime.now().strftime('%Y%m%d_%H%M%S')}.json", 
+        mime="application/json",
+        help="Download your complete learning progress as a JSON file"
+    )
+    
+    # Display current progress stats
     st.write("---")
-    uploaded = st.file_uploader("Upload progress JSON to import", type=["json"])
+    st.subheader("Current Progress Overview")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Total Lessons", len(lessons))
+    
+    with col2:
+        st.metric("Completed", len(st.session_state.completed))
+    
+    with col3:
+        completion_rate = (len(st.session_state.completed) / len(lessons)) * 100 if lessons else 0
+        st.metric("Completion Rate", f"{completion_rate:.1f}%")
+    
+    # Show completed lessons with names
+    if st.session_state.completed:
+        st.write("**Completed Lessons:**")
+        for lesson_id in sorted(st.session_state.completed):
+            lesson = next((l for l in lessons if l["lesson_id"] == lesson_id), None)
+            if lesson:
+                st.write(f"✅ Lesson {lesson_id}: {lesson['title']}")
+    else:
+        st.info("No lessons completed yet. Complete some lessons to see your progress here!")
+    
+    st.write("---")
+    
+    # Import section
+    st.subheader("Import Progress")
+    st.write("Upload a previously exported progress file to restore your learning progress.")
+    
+    uploaded = st.file_uploader(
+        "Choose a progress JSON file", 
+        type=["json"],
+        help="Select a progress.json file that you previously exported from this app"
+    )
+    
     if uploaded:
-        data = json.load(uploaded)
-        comp = data.get("completed", [])
-        st.session_state.completed = set(comp)
-        st.success("Progress imported.")
+        try:
+            # Read and parse the uploaded file
+            data = json.load(uploaded)
+            
+            # Validate the file structure
+            if "completed" not in data:
+                st.error("❌ Invalid progress file: 'completed' field not found.")
+            elif not isinstance(data["completed"], list):
+                st.error("❌ Invalid progress file: 'completed' should be a list.")
+            else:
+                # Validate each lesson ID exists
+                invalid_lessons = [lesson_id for lesson_id in data["completed"] 
+                                  if lesson_id not in [l["lesson_id"] for l in lessons]]
+                
+                if invalid_lessons:
+                    st.warning(f"⚠️ File contains invalid lesson IDs: {invalid_lessons}. These will be ignored.")
+                    # Only keep valid lesson IDs
+                    valid_lessons = [lesson_id for lesson_id in data["completed"] 
+                                    if lesson_id in [l["lesson_id"] for l in lessons]]
+                    st.session_state.completed = set(valid_lessons)
+                else:
+                    st.session_state.completed = set(data["completed"])
+                
+                # Show import results
+                st.success("✅ Progress imported successfully!")
+                
+                # Show import statistics
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.info(f"**Lessons imported:** {len(st.session_state.completed)}")
+                with col2:
+                    st.info(f"**Total available:** {len(lessons)}")
+                
+                # Show what was imported
+                if st.session_state.completed:
+                    st.write("**Imported lessons:**")
+                    for lesson_id in sorted(st.session_state.completed):
+                        lesson = next((l for l in lessons if l["lesson_id"] == lesson_id), None)
+                        if lesson:
+                            st.write(f"📘 Lesson {lesson_id}: {lesson['title']}")
+                
+                # Force a rerun to update the UI everywhere
+                st.rerun()
+                
+        except json.JSONDecodeError:
+            st.error("❌ Error: The uploaded file is not a valid JSON file.")
+        except Exception as e:
+            st.error(f"❌ An unexpected error occurred: {str(e)}")
+    
+    # Reset progress option (with confirmation)
+    st.write("---")
+    st.subheader("Reset Progress")
+    
+    if st.button("🔄 Reset All Progress", help="Clear all your completed lessons"):
+        if st.session_state.completed:
+            # Confirm reset
+            if st.checkbox("I understand this will delete all my progress permanently"):
+                if st.button("Confirm Reset"):
+                    st.session_state.completed = set()
+                    st.success("✅ All progress has been reset!")
+                    st.rerun()
+        else:
+            st.info("No progress to reset. You haven't completed any lessons yet.")
